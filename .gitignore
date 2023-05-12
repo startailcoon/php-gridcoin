@@ -1,0 +1,8 @@
+vendor/*
+composer.lock
+.cache
+.buildpath
+.idea
+.project
+.settings
+.phpunit.result.cache
