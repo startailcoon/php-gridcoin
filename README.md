@@ -2,6 +2,9 @@
 
 phpGridcoin is a RPC connector in PHP for the Gridcoin Research wallet. It connects to a local or remote wallet to fetch chain information.
 
+**PLEASE BE AWARE**  that the current library is not working without the changes submitted to PR #209 on JSONMapper in https://github.com/cweiske/jsonmapper/pull/209
+
+
 
 ---
 ## Static Library
@@ -23,4 +26,4 @@ $currentBlockCount = GridcoinWallet::getblockcount();
 ---
 ## Wallet Commands
 
-See [Wallet Commands](WALLET_COMMANDS.md)
+See [Wallet Commands](https://github.com/startailcoon/phpGridcoin/issues/1)
