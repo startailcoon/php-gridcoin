@@ -1,5 +1,5 @@
 {
-    "name": "coondesign/php-gridcoin",
+    "name": "startailcoon/php-gridcoin",
     "description": "RPC caller written in php for Gridcoin Research",
     "license": "MIT",
     "autoload": {
@@ -10,12 +10,12 @@
         {
             "name": "Startail the 'Coon",
             "email": "startail@coondesign.eu",
-            "homepage": "http://github.com/coondesign/php-gridcoin",
+            "homepage": "http://github.com/startailcoon/php-gridcoin",
             "role": "Developer"
         }
     ],
     "support": {
-        "issues": "https://github.com/coondesign/php-gridcoin/issues"
+        "issues": "https://github.com/startailcoon/php-gridcoin/issues"
     },
     "require": {
         "netresearch/jsonmapper": "^4.2.0",
