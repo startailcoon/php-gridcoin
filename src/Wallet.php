@@ -118,7 +118,7 @@ class Wallet {
      * @param int $startBlockNoOrHash The block number or hash to start from
      * @param int $blocksToFetch The amount of blocks to fetch
      * @param bool $txInfo Whether to include transaction info
-     * @return array An array of Block models
+     * @return Block[] An array of Block models
      */
     public static function getblocksbatch($startBlockNoOrHash, int $blocksToFetch, bool $txInfo = false) {
         $jm = new JsonMapper();
