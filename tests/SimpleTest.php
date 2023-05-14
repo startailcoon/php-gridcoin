@@ -1,7 +1,6 @@
 <?php
 
-require_once __DIR__ . "/../src/GridcoinWallet/Wallet.php";
-require_once __DIR__ . "/../src/GridcoinWallet/models/contract.php";
+require_once __DIR__ . "/../src/models/contract.php";
 
 use phpGridcoin\Wallet;
 use phpGridcoin\Models\ContractBeacon;
