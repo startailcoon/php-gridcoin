@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . "/GWConstants.php";
 require_once __DIR__ . "/models/block.php";
 require_once __DIR__ . "/models/transaction.php";
 require_once __DIR__ . "/models/contract.php";
@@ -17,16 +18,42 @@ class GridcoinWallet {
     public static string $user;
     public static string $pass;
     protected static ?GridcoinWalletRPC $walletRPC = null;
-    protected static JsonMapper $mapper;
-
-    public static function getRPC() {
-        $walletRPC = GridcoinWallet::$walletRPC;
-        
-        if ($walletRPC === null) {
-            $walletRPC = GridcoinWallet::$walletRPC = new GridcoinWalletRPC();
-        }
     
-        return $walletRPC;
+    private static function execute(string $method, array $parameter = array()) {
+        try {
+            return GridcoinWallet::getRPC()->execute($method, $parameter);
+        } catch(Exception $e) {
+
+            # TODO: Reset the connection if it fails
+            GridcoinWallet::$walletRPC = null;
+            throw new Exception("Failed to connect to Gridcoin Wallet RPC");
+            
+        }
+    }
+
+    private static function getRPC() {
+        // We already have a connection, return it
+        if(GridcoinWallet::$walletRPC !== null) {
+            return GridcoinWallet::$walletRPC;
+        }
+
+        while(GridcoinWallet::$walletRPC === null) {
+            foreach(GWConstants::$nodes as $node) {
+                GridcoinWallet::$host = $node["host"];
+                GridcoinWallet::$port = $node["port"];
+                GridcoinWallet::$user = $node["user"];
+                GridcoinWallet::$pass = $node["pass"];
+
+                GridcoinWallet::$walletRPC = new GridcoinWalletRPC(GridcoinWallet::$host, GridcoinWallet::$port, GridcoinWallet::$user, GridcoinWallet::$pass);
+                try {
+                    GridcoinWallet::$walletRPC->execute("getblockcount");
+                    return GridcoinWallet::$walletRPC;
+                } catch(Exception $e) {
+                    continue;
+                }
+            }
+        }
+        throw new Exception("Failed to connect to Gridcoin Wallet RPC");
     }
     
     /**
@@ -34,7 +61,7 @@ class GridcoinWallet {
      * @return int The current block count
      */
     public static function getblockcount():int {
-        return GridcoinWallet::getRPC()->execute("getblockcount");
+        return GridcoinWallet::execute("getblockcount");
     }
 
     /**
@@ -44,7 +71,7 @@ class GridcoinWallet {
      */
     public static function getblockbynumber(int $block_number):Block {
         return (new JsonMapper())->map(
-            GridcoinWallet::getRPC()->execute(
+            GridcoinWallet::execute(
                 "getblockbynumber", 
                 array($block_number)
             ), 
@@ -66,7 +93,7 @@ class GridcoinWallet {
         };
 
         return $jm->mapArray(
-            GridcoinWallet::getRPC()->execute(
+            GridcoinWallet::execute(
                 "getblocksbatch", 
                 array($startBlockNoOrHash, $blocksToFetch, $txInfo)
             )->blocks, 
@@ -87,7 +114,7 @@ class GridcoinWallet {
         };
 
         return $jm->map(
-            GridcoinWallet::getRPC()->execute(
+            GridcoinWallet::execute(
                 "gettransaction", 
                 array($txid)
             ),
@@ -101,7 +128,7 @@ class GridcoinWallet {
      */
     public static function getrawmempool() {
         $map_tx = array();
-        $mempool = (array)GridcoinWallet::getRPC()->execute("getrawmempool");
+        $mempool = (array)GridcoinWallet::execute("getrawmempool");
         foreach($mempool as $txid) {
             $map_tx[] = self::gettransaction($txid); 
         }
@@ -116,7 +143,7 @@ class GridcoinWallet {
      */
     public static function getvotingclaim(string $poll_or_vote_id) {
         return (new JsonMapper)->map(
-            GridcoinWallet::getRPC()->execute("getvotingclaim", array($poll_or_vote_id)),
+            GridcoinWallet::execute("getvotingclaim", array($poll_or_vote_id)),
             new ContractVoteClaim()
         );
     }
@@ -143,6 +170,10 @@ class GridcoinWalletRPC {
     public string $port;
     public string $user;
     public string $pass;
+    public int $error_code = 0;
+    public string $error_message = "";
+    public string $error_maker = "";
+
     private float $timer = 0;
     public function __construct($host = null, $port = null, $user = null, $pass = null) {
         if ($host === null) { $host = GridcoinWallet::$host; }
@@ -169,7 +200,7 @@ class GridcoinWalletRPC {
         
         return isset($response->result) ? $response->result : null;
     }
-    private function get_result($method, $parameter, $runs = 0) {
+    private function get_result($method, $parameter) {
         $curl = new Curl\Curl;
         $curl->setOpt(CURLOPT_TIMEOUT, 30);
         if($this->user && $this->pass) {
@@ -178,25 +209,11 @@ class GridcoinWalletRPC {
         $payload = $this->createPayload($method, $parameter);
         $curl->post($this->host . ":" . $this->port, $payload);
 
-        if($curl->error) {
-            
-            printf("Curl run %s: Error %s - %s", $runs, $curl->error_code, $curl->error_message);
-            throw new Exception("To many runs ($runs)");
-            if($runs > 1) {
-                throw new Exception("To many runs ($runs)");
-            }
-            sleep(5);
-            $runs++;
-            $this->get_result(...);
+        if($curl->error || $curl->error_code > 0) {
+            throw new Exception("cURL Error: " . $curl->error_code . ": " . $curl->error_message);
         }
 
         $curl->close();
-
-        if($curl->error_code > 0) {
-            printf("[" . date("Y-m-d H:i:s") . "] Curl threw error %s: %s\n", $curl->error_code, $curl->error_message);
-            sleep(10);
-            $this->get_result($method, $parameter);
-        }
 
         // In Mainnet Tx 22322ad894648edacd3870793dd0522abbbc1af7abd60fd95bf10c7ca3b60e03
         // we have a character in the hashboinc content <BINARY> which will cause an
@@ -210,13 +227,17 @@ class GridcoinWalletRPC {
         $response = json_decode($response);
 
         if(json_last_error()) {
-            printf("[" . date("Y-m-d H:i:s") . "] JSON threw error %s: %s", json_last_error(), json_last_error_msg());
+            $this->error_message = json_last_error_msg();
+            $this->error_code = json_last_error();
+            // printf("[" . date("Y-m-d H:i:s") . "] JSON threw error %s: %s", json_last_error(), json_last_error_msg());
             sleep(10);
             $response = $this->execute($method, $parameter);
         }
 
         if($response->error) {
-            printf("[" . date("Y-m-d H:i:s") . "] Wallet threw error %s: %s\n", $response->error, $response->errmsg);
+            $this->error_message = $response->errmsg;
+            $this->error_code = $response->error;
+            // printf("[" . date("Y-m-d H:i:s") . "] Wallet threw error %s: %s\n", $response->error, $response->errmsg);
             sleep(10);
             $this->get_result($method, $parameter);
         }

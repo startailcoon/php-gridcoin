@@ -4,26 +4,17 @@ require_once __DIR__ . "/../src/GridcoinWallet/models/contract.php";
 
 class SimpleTest extends \PHPUnit\Framework\TestCase {
 
-    private function connect() {
-        GridcoinWallet::$host = "localhost";
-        GridcoinWallet::$port = "25717";
-        GridcoinWallet::$user = "gridcoinrpc";
-        GridcoinWallet::$pass = "ASHDASjlaksjdoaisud0a987ASJDALSJD";
-    }
 
     public function testGetBlockCount() {
-        $this->connect();
         $this->assertIsInt(GridcoinWallet::getblockcount());
     }
 
     public function testGetBlockHash() {
-        $this->connect();
         $this->assertIsObject(GridcoinWallet::getblockbynumber(1));
         $this->assertObjectHasProperty("hash", GridcoinWallet::getblockbynumber(1));
     }
 
     public function testGetBlocksBatchWithTxData() {
-        $this->connect();
         foreach(GridcoinWallet::getblocksbatch(1, 1, true) as $block) {
             $this->assertIsObject($block);
             $this->assertObjectHasProperty("hash", $block);
@@ -34,7 +25,6 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function testGetBlocksBatchWithoutTxData() {
-        $this->connect();
         foreach(GridcoinWallet::getblocksbatch(1, 1, false) as $block) {
             $this->assertIsObject($block);
             $this->assertObjectHasProperty("hash", $block);
@@ -44,14 +34,12 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function testGetTransaction() {
-        $this->connect();
         $data = GridcoinWallet::gettransaction("945051eb9c4f6c56a7620d1112dab0122e41f2b17b58338e45ce58164c52e068");
         $this->assertIsObject($data);
         $this->assertObjectHasProperty("txid", $data);
     }
 
     public function testContractBeacon() {
-        $this->connect();
         $data = GridcoinWallet::gettransaction("be7446e0fd091c5d45fc4d4e67dc7fc71526a7d5309add0c768cfdd5f1076fe0");
         
         /** @var ContractBeacon */
@@ -62,7 +50,6 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function testGetMempool() {
-        $this->connect();
 
         $mempool = GridcoinWallet::getrawmempool();
 

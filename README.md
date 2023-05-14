@@ -19,3 +19,8 @@ GridcoinWallet::$pass = "mySecretWalletPasswd";
 // Get Current Block Count
 $currentBlockCount = GridcoinWallet::getblockcount();
 ```
+
+---
+## Wallet Commands
+
+See [Wallet Commands](WALLET_COMMANDS.md)
