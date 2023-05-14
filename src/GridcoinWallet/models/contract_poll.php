@@ -1,5 +1,7 @@
 <?php
 
+namespace phpGridcoin\Models;
+
 class ContractPoll { 
     var int $version;
     var string $title;

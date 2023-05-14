@@ -6,7 +6,6 @@ if (is_dir(__DIR__ . '/../src/')) {
         . PATH_SEPARATOR . get_include_path()
     );
 }
-require_once 'GridcoinWallet/GridcoinWallet.php';
-require_once 'GridcoinWallet/Exception.php';
+require_once 'GridcoinWallet/Wallet.php';
 
 ?>

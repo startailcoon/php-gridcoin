@@ -1,5 +1,7 @@
 <?php
 
+namespace phpGridcoin\Models;
+
 require_once __DIR__ . "/contract_mrc.php";
 require_once __DIR__ . "/transaction.php";
 
@@ -37,7 +39,7 @@ class Block {
      * The wallet can return either an array of TX ids, or the full transaction
      */
     public static function determineTxClass($class, $jvalue, $pjson) {
-        return is_string($jvalue) ? 'string' : 'Transaction';
+        return is_string($jvalue) ? 'string' : 'phpGridcoin\Models\Transaction';
     }
 
     /**

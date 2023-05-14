@@ -1,5 +1,7 @@
 <?php
 
+namespace phpGridcoin\Models;
+
 require_once __DIR__ . "/contract.php";
 
 class Transaction {
