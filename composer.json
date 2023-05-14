@@ -3,7 +3,7 @@
     "description": "RPC caller written in php for Gridcoin Research",
     "license": "MIT",
     "autoload": {
-        "psr-0": {"phpGridcoin": "src/"},
+        "psr-0": {"phpGridcoin": "src/GridcoinWallet"},
         "exclude-from-classmap": ["/tests/"]
     },
     "authors": [
