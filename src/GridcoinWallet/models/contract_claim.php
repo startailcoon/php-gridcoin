@@ -1,5 +1,7 @@
 <?php
 
+namespace phpGridcoin\Models;
+
 /**
  * Claim Contracts
  * ------

@@ -1,21 +1,35 @@
 <?php
 
+require_once __DIR__ . "/../src/GridcoinWallet/Wallet.php";
 require_once __DIR__ . "/../src/GridcoinWallet/models/contract.php";
+
+use phpGridcoin\Wallet;
+use phpGridcoin\Models\ContractBeacon;
 
 class SimpleTest extends \PHPUnit\Framework\TestCase {
 
+    // public function testMyFailingConnect() {
+    //     Wallet::setNode("loascalhost", 15715, "test", "test");
+    //     Wallet::$allowPublicNodes = true;
+
+    //     try {
+    //         Wallet::getblockcount();
+    //     } catch (WalletException $e) {
+    //         $this->assertStringContainsString("Failed to connect to Gridcoin Wallet RPC", $e->getMessage());
+    //     }
+    // }
 
     public function testGetBlockCount() {
-        $this->assertIsInt(GridcoinWallet::getblockcount());
+        $this->assertIsInt(Wallet::getblockcount());
     }
 
     public function testGetBlockHash() {
-        $this->assertIsObject(GridcoinWallet::getblockbynumber(1));
-        $this->assertObjectHasProperty("hash", GridcoinWallet::getblockbynumber(1));
+        $this->assertIsObject(Wallet::getblockbynumber(1));
+        $this->assertObjectHasProperty("hash", Wallet::getblockbynumber(1));
     }
 
     public function testGetBlocksBatchWithTxData() {
-        foreach(GridcoinWallet::getblocksbatch(1, 1, true) as $block) {
+        foreach(Wallet::getblocksbatch(1, 1, true) as $block) {
             $this->assertIsObject($block);
             $this->assertObjectHasProperty("hash", $block);
             $this->assertObjectHasProperty("tx", $block);
@@ -25,7 +39,7 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function testGetBlocksBatchWithoutTxData() {
-        foreach(GridcoinWallet::getblocksbatch(1, 1, false) as $block) {
+        foreach(Wallet::getblocksbatch(1, 1, false) as $block) {
             $this->assertIsObject($block);
             $this->assertObjectHasProperty("hash", $block);
             $this->assertObjectHasProperty("tx", $block);
@@ -34,13 +48,13 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
     }
 
     public function testGetTransaction() {
-        $data = GridcoinWallet::gettransaction("945051eb9c4f6c56a7620d1112dab0122e41f2b17b58338e45ce58164c52e068");
+        $data = Wallet::gettransaction("945051eb9c4f6c56a7620d1112dab0122e41f2b17b58338e45ce58164c52e068");
         $this->assertIsObject($data);
         $this->assertObjectHasProperty("txid", $data);
     }
 
     public function testContractBeacon() {
-        $data = GridcoinWallet::gettransaction("be7446e0fd091c5d45fc4d4e67dc7fc71526a7d5309add0c768cfdd5f1076fe0");
+        $data = Wallet::gettransaction("be7446e0fd091c5d45fc4d4e67dc7fc71526a7d5309add0c768cfdd5f1076fe0");
         
         /** @var ContractBeacon */
         $body = $data->contracts[0]->body;
@@ -51,7 +65,7 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
 
     public function testGetMempool() {
 
-        $mempool = GridcoinWallet::getrawmempool();
+        $mempool = Wallet::getrawmempool();
 
         // This output can be an empty array, so we can't test for an object 
         // But we can test this to make sure the command works
@@ -68,7 +82,7 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
 
     // public function testBlock() {
     //     $this->connect();
-    //     $block = GridcoinWallet::getblockbynumber(1);
+    //     $block = Wallet::getblockbynumber(1);
     // }
 
 }

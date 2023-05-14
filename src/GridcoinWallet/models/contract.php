@@ -1,5 +1,7 @@
 <?php
 
+namespace phpGridcoin\Models;
+
 require_once __DIR__ . "/contract_beacon.php";
 require_once __DIR__ . "/contract_claim.php";
 require_once __DIR__ . "/contract_mrc.php";
@@ -27,36 +29,36 @@ class ContractBody {
 
             switch(strtoupper($pjson->type)) {
                 case "SCRAPER":
-                    if(!isset($json->version))  return 'ContractScraper';
+                    if(!isset($json->version))  return 'phpGridcoin\Models\ContractScraper';
                     break;
 
                 case "PROTOCOL":
-                    if(!isset($json->version))  return 'ContractProtocol';
+                    if(!isset($json->version))  return 'phpGridcoin\Models\ContractProtocol';
                     break;
 
                 case "CLAIM":
-                    if($json->version <= 4)     return 'ContractClaim';
+                    if($json->version <= 4)     return 'phpGridcoin\Models\ContractClaim';
                     break;
 
                 case "MRC":
-                    if($json->version <= 1)       return 'ContractMRC';
+                    if($json->version <= 1)       return 'phpGridcoin\Models\ContractMRC';
                     break;
 
                 case "PROJECT":
-                    if($json->version <= 2)       return 'ContractProject';
+                    if($json->version <= 2)       return 'phpGridcoin\Models\ContractProject';
                     break;
 
                 case "BEACON":
-                    if($json->version <= 2)       return 'ContractBeacon';
+                    if($json->version <= 2)       return 'phpGridcoin\Models\ContractBeacon';
                     break;
 
                 case "POLL":
-                    if($json->version <= 3)       return 'ContractPoll';
+                    if($json->version <= 3)       return 'phpGridcoin\Models\ContractPoll';
                     break;
 
                 case "VOTE":
-                    if(!isset($json->version))    return 'ContractVoteLegacy';
-                    if($json->version == 1)       return 'ContractVote';
+                    if(!isset($json->version))    return 'phpGridcoin\Models\ContractVoteLegacy';
+                    if($json->version == 1)       return 'phpGridcoin\Models\ContractVote';
                     break;
             }
 

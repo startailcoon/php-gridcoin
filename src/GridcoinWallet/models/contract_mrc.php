@@ -1,5 +1,7 @@
 <?php
 
+namespace phpGridcoin\Models;
+
 class ContractMRC {
     var int $version;
     var string $cpid;

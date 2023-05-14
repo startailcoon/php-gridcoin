@@ -1,5 +1,7 @@
 <?php
 
+namespace phpGridcoin\Models;
+
 class ContractVoteLegacy {
     var string $key;
     var string $mining_id;
