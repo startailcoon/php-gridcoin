@@ -24,38 +24,60 @@ require_once __DIR__ . "/models/contract.php";
  */
 class Wallet {
 
-    public static string $host;
-    public static string $port;
-    public static string $user;
-    public static string $pass;
-    protected static ?GridcoinWalletRPC $walletRPC = null;
+    private static array $nodes;
+    public static bool $allowPublicNodes = true;
+    protected static ?WalletRPC $walletRPC = null;
     
+    public static function setAllowPublicNodes(bool $allowPublicNodes = true) {
+        Wallet::$allowPublicNodes = $allowPublicNodes;
+    }
+    
+    public static function addNode(string $host, int $port, string $user = "", string $pass = "") {
+        Wallet::$nodes = array_merge(array(
+            "host" => $host,
+            "port" => $port,
+            "user" => $user,
+            "pass" => $pass
+        ), Wallet::$nodes);
+    }
+
+    public static function removeNode(string $host, string $port, string $user, string $pass) {
+        foreach(Wallet::$nodes as $key => $node) {
+            if($node["host"] === $host && $node["port"] === $port && $node["user"] === $user && $node["pass"] === $pass) {
+                unset(Wallet::$nodes[$key]);
+            }
+        }
+    }
+
     private static function execute(string $method, array $parameter = array()) {
         try {
             return Wallet::getRPC()->execute($method, $parameter);
         } catch(Exception $e) {
-
-            # TODO: Reset the connection if it fails
-            Wallet::$walletRPC = null;
-            throw new Exception("Failed to connect to Gridcoin Wallet RPC");
-            
+            throw new Exception("Failed to execute RPC method: " . $method);
         }
     }
 
-    private static function getRPC() {
+    public static function getRPC() {
         // We already have a connection, return it
-        if(Wallet::$walletRPC !== null) {
+        if(Wallet::$walletRPC !== null && Wallet::$walletRPC->error === false) {
             return Wallet::$walletRPC;
         }
 
-        while(Wallet::$walletRPC === null) {
-            foreach(Constants::$nodes as $node) {
-                Wallet::$host = $node["host"];
-                Wallet::$port = $node["port"];
-                Wallet::$user = $node["user"];
-                Wallet::$pass = $node["pass"];
+        // Append default nodes to the list if allowed
+        if(!empty(Wallet::$nodes) && Wallet::$allowPublicNodes) {
+            Wallet::$nodes = array_merge(Wallet::$nodes, Constants::$nodes);
+        }
 
-                Wallet::$walletRPC = new GridcoinWalletRPC(Wallet::$host, Wallet::$port, Wallet::$user, Wallet::$pass);
+        // If no nodes are set, use the default nodes
+        if(empty(Wallet::$nodes)) {
+            Wallet::$nodes = Constants::$nodes;
+        } 
+
+        while(Wallet::$walletRPC === null) {
+
+            foreach(Wallet::$nodes as $node) {
+                Wallet::$walletRPC = new WalletRPC($node["host"], $node["port"], $node["user"], $node["pass"]);
+
                 try {
                     Wallet::$walletRPC->execute("getblockcount");
                     return Wallet::$walletRPC;
@@ -64,6 +86,7 @@ class Wallet {
                 }
             }
         }
+
         throw new Exception("Failed to connect to Gridcoin Wallet RPC");
     }
     
@@ -175,12 +198,13 @@ class Wallet {
  * This class handles the communication with the Gridcoin Wallet
  * and returns the data as JSON
  */
-class GridcoinWalletRPC {
+class WalletRPC {
 
     public string $host;
     public string $port;
     public string $user;
     public string $pass;
+    public bool $error = false;
     public int $error_code = 0;
     public string $error_message = "";
     public string $error_maker = "";
@@ -221,6 +245,7 @@ class GridcoinWalletRPC {
         $curl->post($this->host . ":" . $this->port, $payload);
 
         if($curl->error || $curl->error_code > 0) {
+            $this->error = true;
             throw new Exception("cURL Error: " . $curl->error_code . ": " . $curl->error_message);
         }
 
@@ -236,6 +261,7 @@ class GridcoinWalletRPC {
         $response = json_decode($response);
 
         if(json_last_error()) {
+            $this->error = true;
             throw new Exception("JSON Error: " . json_last_error() . ": " . json_last_error_msg());
             // $this->error_message = json_last_error_msg();
             // $this->error_code = json_last_error();
@@ -245,6 +271,7 @@ class GridcoinWalletRPC {
         }
 
         if($response->error) {
+            $this->error = true;
             throw new Exception("Wallet Error: " . $response->error . ": " . $response->errmsg);
             // $this->error_message = $response->errmsg;
             // $this->error_code = $response->error;

@@ -8,6 +8,17 @@ use phpGridcoin\Models\ContractBeacon;
 
 class SimpleTest extends \PHPUnit\Framework\TestCase {
 
+    // public function testMyFailingConnect() {
+    //     Wallet::setNode("loascalhost", 15715, "test", "test");
+    //     Wallet::$allowPublicNodes = true;
+
+    //     try {
+    //         Wallet::getblockcount();
+    //     } catch (WalletException $e) {
+    //         $this->assertStringContainsString("Failed to connect to Gridcoin Wallet RPC", $e->getMessage());
+    //     }
+    // }
+
     public function testGetBlockCount() {
         $this->assertIsInt(Wallet::getblockcount());
     }
