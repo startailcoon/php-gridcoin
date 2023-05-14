@@ -33,12 +33,12 @@ class Wallet {
     }
     
     public static function addNode(string $host, int $port, string $user = "", string $pass = "") {
-        Wallet::$nodes = array_merge(array(
+        Wallet::$nodes[] = array(
             "host" => $host,
             "port" => $port,
             "user" => $user,
             "pass" => $pass
-        ), Wallet::$nodes);
+        );
     }
 
     public static function removeNode(string $host, string $port, string $user, string $pass) {
