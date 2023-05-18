@@ -11,7 +11,6 @@ use Exception;
 use JsonMapper;
 use Curl;
 
-require_once __DIR__ . "/Constants.php";
 require_once __DIR__ . "/models/block.php";
 require_once __DIR__ . "/models/transaction.php";
 require_once __DIR__ . "/models/contract.php";
@@ -24,47 +23,32 @@ require_once __DIR__ . "/models/contract.php";
  */
 class Wallet {
 
-    private static array $nodes;
-    public static bool $allowPublicNodes = true;
+    public static bool $error = false;
+    public static string $errorMsg = "";
     protected static ?WalletRPC $walletRPC = null;
-    private static bool $isPublicNodeRPC = false;
+    private static bool $isPrivateNode = false;
+    private static string $host;
+    private static int $port;
+    private static string $user;
+    private static string $pass;
     
     /**
      * Set the RPC to be a public node RPC
      * This will limit the use of some commands that are not allowed on public nodes
      */
-    public static function setIsPublicNodeRPC() {
-        Wallet::$isPublicNodeRPC = true;
-    }
-
-    
-    public static function setAllowPublicNodes(bool $allowPublicNodes = true) {
-        Wallet::$allowPublicNodes = $allowPublicNodes;
+    public static function setIsPrivateNode() {
+        Wallet::$isPrivateNode = true;
     }
     
-    public static function addNode(string $host, int $port, string $user = "", string $pass = "") {
-        Wallet::$nodes[] = array(
-            "host" => $host,
-            "port" => $port,
-            "user" => $user,
-            "pass" => $pass
-        );
-    }
-
-    public static function removeNode(string $host, string $port, string $user, string $pass) {
-        foreach(Wallet::$nodes as $key => $node) {
-            if($node["host"] === $host && $node["port"] === $port && $node["user"] === $user && $node["pass"] === $pass) {
-                unset(Wallet::$nodes[$key]);
-            }
-        }
+    public static function setNode(string $host, int $port, string $user, string $pass) {
+        Wallet::$host = $host;
+        Wallet::$port = $port;
+        Wallet::$user = $user;
+        Wallet::$pass = $pass;
     }
 
     private static function execute(string $method, array $parameter = array()) {
-        try {
-            return Wallet::getRPC()->execute($method, $parameter);
-        } catch(Exception $e) {
-            throw new Exception("Failed to execute RPC method: " . $method);
-        }
+        return Wallet::getRPC()->execute($method, $parameter);
     }
 
     private static function getRPC() {
@@ -73,31 +57,18 @@ class Wallet {
             return Wallet::$walletRPC;
         }
 
-        // Append default nodes to the list if allowed
-        if(!empty(Wallet::$nodes) && Wallet::$allowPublicNodes) {
-            Wallet::$nodes = array_merge(Wallet::$nodes, Constants::$nodes);
+        Wallet::$walletRPC = new WalletRPC(Wallet::$host, Wallet::$port, Wallet::$user, Wallet::$pass);
+
+        try {
+            Wallet::$walletRPC->execute("getblockcount");
+            return Wallet::$walletRPC;
+        } catch(Exception $e) {
+            Wallet::$error = true;
+            Wallet::$errorMsg = "Failed to connect to Gridcoin Wallet RPC";
+            return;
         }
 
-        // If no nodes are set, use the default nodes
-        if(empty(Wallet::$nodes)) {
-            Wallet::$nodes = Constants::$nodes;
-        } 
-
-        while(Wallet::$walletRPC === null) {
-
-            foreach(Wallet::$nodes as $node) {
-                Wallet::$walletRPC = new WalletRPC($node["host"], $node["port"], $node["user"], $node["pass"]);
-
-                try {
-                    Wallet::$walletRPC->execute("getblockcount");
-                    return Wallet::$walletRPC;
-                } catch(Exception $e) {
-                    continue;
-                }
-            }
-        }
-
-        throw new Exception("Failed to connect to Gridcoin Wallet RPC");
+        
     }
     
     /**
@@ -192,9 +163,12 @@ class Wallet {
         );
     }
 
+    /**
+     * Catch all for unknown methods
+     */
     public static function __callStatic($name, $args) {
-        printf("Usable to find method '%s' with args: %s\n", $name, json_encode($args));
-        exit();
+        Wallet::$error = true;
+        Wallet::$errorMsg = "Unknown method '" . $name . "' with args: " . json_encode($args);
     }
 }
 
@@ -216,12 +190,7 @@ class WalletRPC {
     public string $error_maker = "";
 
     private float $timer = 0;
-    public function __construct($host = null, $port = null, $user = null, $pass = null) {
-        if ($host === null) { $host = Wallet::$host; }
-        if ($port === null) { $port = Wallet::$port; }
-        if ($user === null) { $user = Wallet::$user; }
-        if ($pass === null) { $pass = Wallet::$pass; }
-
+    public function __construct($host, $port, $user, $pass) {
         $this->host = $host;
         $this->port = $port;
         $this->user = $user;
@@ -269,21 +238,11 @@ class WalletRPC {
         if(json_last_error()) {
             $this->error = true;
             throw new Exception("JSON Error: " . json_last_error() . ": " . json_last_error_msg());
-            // $this->error_message = json_last_error_msg();
-            // $this->error_code = json_last_error();
-            // // printf("[" . date("Y-m-d H:i:s") . "] JSON threw error %s: %s", json_last_error(), json_last_error_msg());
-            // sleep(10);
-            // $response = $this->execute($method, $parameter);
         }
 
         if($response->error) {
             $this->error = true;
             throw new Exception("Wallet Error: " . $response->error . ": " . $response->errmsg);
-            // $this->error_message = $response->errmsg;
-            // $this->error_code = $response->error;
-            // // printf("[" . date("Y-m-d H:i:s") . "] Wallet threw error %s: %s\n", $response->error, $response->errmsg);
-            // sleep(10);
-            // $this->get_result($method, $parameter);
         }
 
         return $response;
