@@ -27,6 +27,16 @@ class Wallet {
     private static array $nodes;
     public static bool $allowPublicNodes = true;
     protected static ?WalletRPC $walletRPC = null;
+    private static bool $isPublicNodeRPC = false;
+    
+    /**
+     * Set the RPC to be a public node RPC
+     * This will limit the use of some commands that are not allowed on public nodes
+     */
+    public static function setIsPublicNodeRPC() {
+        Wallet::$isPublicNodeRPC = true;
+    }
+
     
     public static function setAllowPublicNodes(bool $allowPublicNodes = true) {
         Wallet::$allowPublicNodes = $allowPublicNodes;
@@ -57,7 +67,7 @@ class Wallet {
         }
     }
 
-    public static function getRPC() {
+    private static function getRPC() {
         // We already have a connection, return it
         if(Wallet::$walletRPC !== null && Wallet::$walletRPC->error === false) {
             return Wallet::$walletRPC;
@@ -182,14 +192,10 @@ class Wallet {
         );
     }
 
-    // public static function __callStatic($name, $args) {
-    //     $fn = array(GridcoinWallet::getRPC(), $name);
-    //     if (! is_callable($fn)) {
-    //         throw new GridcoinWalletException("GridcoiNWallet does not have a method called $name");
-    //     }
-
-    //     return call_user_func_array($fn, $args);
-    // }
+    public static function __callStatic($name, $args) {
+        printf("Usable to find method '%s' with args: %s\n", $name, json_encode($args));
+        exit();
+    }
 }
 
 /**
