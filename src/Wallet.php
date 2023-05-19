@@ -23,9 +23,8 @@ require_once __DIR__ . "/models/contract.php";
  */
 class Wallet {
 
-    public static bool $error = false;
-    public static string $errorMsg = "";
-    protected static ?WalletRPC $walletRPC = null;
+    private static string $errorMsg = "";
+    private static ?WalletRPC $walletRPC = null;
     private static bool $isPrivateNode = false;
     private static string $host;
     private static int $port;
@@ -47,29 +46,22 @@ class Wallet {
         Wallet::$pass = $pass;
     }
 
-    private static function execute(string $method, array $parameter = array()) {
-        return Wallet::getRPC()->execute($method, $parameter);
+    public static function getIsError():bool {
+        return !empty(Wallet::$errorMsg) ? true : false;
     }
 
-    private static function getRPC() {
-        // We already have a connection, return it
-        if(Wallet::$walletRPC !== null && Wallet::$walletRPC->error === false) {
-            return Wallet::$walletRPC;
-        }
-
-        Wallet::$walletRPC = new WalletRPC(Wallet::$host, Wallet::$port, Wallet::$user, Wallet::$pass);
-
-        try {
-            Wallet::$walletRPC->execute("getblockcount");
-            return Wallet::$walletRPC;
-        } catch(Exception $e) {
-            Wallet::$error = true;
-            Wallet::$errorMsg = "Failed to connect to Gridcoin Wallet RPC";
-            return;
-        }
-
-        
+    public static function getErrorMsg():string {
+        return Wallet::$errorMsg;
     }
+
+    public static function setErrorMsg(string $msg) {
+        Wallet::$errorMsg = $msg;
+    }
+
+    // Wallet RPC Methods below
+    // --------------------------------------------------------------------------------------------
+    // These methods are the RPC methods that are used to communicate with the wallet
+    // They all coresponds to a method in the wallet RPC
     
     /**
      * Get the current block count
@@ -163,12 +155,37 @@ class Wallet {
         );
     }
 
+    // Wallet RPC Functions below
+    // --------------------------------------------------------------------------------------------
+    // These functions are not part of the Gridcoin Wallet RPC
+    // They are helper functions to handle the data from the RPC
+
     /**
      * Catch all for unknown methods
      */
     public static function __callStatic($name, $args) {
-        Wallet::$error = true;
         Wallet::$errorMsg = "Unknown method '" . $name . "' with args: " . json_encode($args);
+    }
+
+    private static function execute(string $method, array $parameter = array()) {
+        return Wallet::getRPC()->execute($method, $parameter);
+    }
+
+    private static function getRPC() {
+        // We already have a connection, return it
+        if(Wallet::$walletRPC !== null && Wallet::$walletRPC->error === false) {
+            return Wallet::$walletRPC;
+        }
+
+        Wallet::$walletRPC = new WalletRPC(Wallet::$host, Wallet::$port, Wallet::$user, Wallet::$pass);
+
+        try {
+            Wallet::$walletRPC->execute("getblockcount");
+            return Wallet::$walletRPC;
+        } catch(Exception $e) {
+            Wallet::$errorMsg = "Failed to connect to Gridcoin Wallet RPC";
+            return;
+        }
     }
 }
 
@@ -286,6 +303,9 @@ class WalletRPC {
         return $thisParam;
     }
 }
+
+## TODO: Make use of a proper exception class
+## This is not used yet, but will be in the future
 
 class WalletException extends Exception {
     public function __construct($message='') {
