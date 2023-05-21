@@ -23,7 +23,8 @@ require_once __DIR__ . "/models/contract.php";
  */
 class Wallet {
 
-    private static string $errorMsg = "";
+    protected static string $error_message = "";
+    protected static int $error_code = 0;
     private static ?WalletRPC $walletRPC = null;
     private static bool $isPrivateNode = false;
     private static string $host;
@@ -38,24 +39,20 @@ class Wallet {
     public static function setIsPrivateNode() {
         Wallet::$isPrivateNode = true;
     }
+
+    public static function getErrorCode() {
+        return Wallet::$error_code;
+    }
+
+    public static function getErrorMessage() {
+        return Wallet::$error_message;
+    }
     
     public static function setNode(string $host, int $port, string $user, string $pass) {
         Wallet::$host = $host;
         Wallet::$port = $port;
         Wallet::$user = $user;
         Wallet::$pass = $pass;
-    }
-
-    public static function getIsError():bool {
-        return !empty(Wallet::$errorMsg) ? true : false;
-    }
-
-    public static function getErrorMsg():string {
-        return Wallet::$errorMsg;
-    }
-
-    public static function setErrorMsg(string $msg) {
-        Wallet::$errorMsg = $msg;
     }
 
     // Wallet RPC Methods below
@@ -114,19 +111,25 @@ class Wallet {
      * @param string $txid The transaction id
      * @return Transaction The Transaction model
      */
-    public static function gettransaction(string $txid):Transaction {
+    public static function gettransaction(string $txid):Transaction|null {
         $jm = new JsonMapper();
         $jm->classMap[ContractBody::class] = function($class, $jvalue, $pjson) {
             return ContractBody::determineClass($class, $jvalue, $pjson);
         };
 
-        return $jm->map(
-            Wallet::execute(
-                "gettransaction", 
-                array($txid)
-            ),
-            new Transaction()
+        $result = Wallet::execute(
+            "gettransaction", 
+            array($txid)
         );
+
+        if($result === null) {
+            Wallet::$error_code = 404;
+            Wallet::$error_message = "No Transaction with the txid of '{$txid}' was found";
+
+            return null;
+        }
+
+        return $jm->map($result, new Transaction());
     }
 
     /**
@@ -164,16 +167,23 @@ class Wallet {
      * Catch all for unknown methods
      */
     public static function __callStatic($name, $args) {
-        Wallet::$errorMsg = "Unknown method '" . $name . "' with args: " . json_encode($args);
+        Wallet::$error_code = 404;
+        Wallet::$error_message = "Invalid method '" . $name . "' with args: " . json_encode($args);
     }
 
     private static function execute(string $method, array $parameter = array()) {
-        return Wallet::getRPC()->execute($method, $parameter);
+        $result = Wallet::getRPC()->execute($method, $parameter);
+
+        if($result) { return $result; }
+
+        Wallet::$error_code = Wallet::getRPC()->error_code;
+        Wallet::$error_message = Wallet::getRPC()->error_message;
+        return;
     }
 
     private static function getRPC() {
         // We already have a connection, return it
-        if(Wallet::$walletRPC !== null && Wallet::$walletRPC->error === false) {
+        if(Wallet::$walletRPC !== null && Wallet::$walletRPC->error_code === 0) {
             return Wallet::$walletRPC;
         }
 
@@ -183,7 +193,8 @@ class Wallet {
             Wallet::$walletRPC->execute("getblockcount");
             return Wallet::$walletRPC;
         } catch(Exception $e) {
-            Wallet::$errorMsg = "Failed to connect to Gridcoin Wallet RPC";
+            Wallet::$error_code = 503;
+            Wallet::$error_message = "Failed to connect to Gridcoin Wallet RPC";
             return;
         }
     }
@@ -201,10 +212,9 @@ class WalletRPC {
     public string $port;
     public string $user;
     public string $pass;
-    public bool $error = false;
+    public array $response;
     public int $error_code = 0;
     public string $error_message = "";
-    public string $error_maker = "";
 
     private float $timer = 0;
     public function __construct($host, $port, $user, $pass) {
@@ -224,11 +234,12 @@ class WalletRPC {
         $timer = microtime(true);
         $response = $this->get_result($method, $parameter);
         $this->timer += microtime(true) - $timer;
-        
-        return isset($response->result) ? $response->result : null;
+
+        return $response;
     }
+
     private function get_result($method, $parameter) {
-        $curl = new Curl\Curl;
+        $curl = new Curl\Curl();
         $curl->setOpt(CURLOPT_TIMEOUT, 30);
         if($this->user && $this->pass) {
             $curl->setBasicAuthentication($this->user, $this->pass);
@@ -237,8 +248,9 @@ class WalletRPC {
         $curl->post($this->host . ":" . $this->port, $payload);
 
         if($curl->error || $curl->error_code > 0) {
-            $this->error = true;
-            throw new Exception("cURL Error: " . $curl->error_code . ": " . $curl->error_message);
+            $this->error_code = 501;
+            $this->error_message = "cURL Error: " . $curl->error_code . ": " . $curl->error_message;
+            return;
         }
 
         $curl->close();
@@ -253,17 +265,20 @@ class WalletRPC {
         $response = json_decode($response);
 
         if(json_last_error()) {
-            $this->error = true;
-            throw new Exception("JSON Error: " . json_last_error() . ": " . json_last_error_msg());
+            $this->error_code = 502;
+            $this->error_message = "JSON Error: " . json_last_error() . ": " . json_last_error_msg();
+            return;
         }
 
         if($response->error) {
-            $this->error = true;
-            throw new Exception("Wallet Error: " . $response->error . ": " . $response->errmsg);
+            $this->error_code = 503;
+            $this->error_message = "Wallet Error: " . $response->error . ": " . $response->errmsg;
+            return;
         }
 
-        return $response;
+        return $response->result;
     }
+
     private function createPayload($method, $params_array) {
         $params_string = null;
 

@@ -1,0 +1,14 @@
+<VirtualHost *:8888>
+        ServerAdmin admin@mydomain.tld
+        DocumentRoot /full-path-to/phpGridcoin/public
+        ServerName api.mydomain.tld
+
+        ErrorLog /full-path-to/phpGridcoin/logs/apache.error.log
+        CustomLog /full-path-to/phpGridcoin/logs/apache.access.log combined
+
+        <Directory "/full-path-to/phpGridcoin/public">
+                Options Indexes FollowSymLinks
+                AllowOverride None
+                Require all granted
+        </Directory>
+</VirtualHost>

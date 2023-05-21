@@ -6,36 +6,19 @@ require_once __DIR__ . "/contract.php";
 
 class Transaction {
 
-    /** @var string */
-    var $txid;
-
-    /** @var int */
-    var $version;
-
-    /** @var int */
-    var $size;
-
-    /** @var int */
-    var $time;
-    
-    /** @var int */
-    var $locktime;
-    
-    /** @var string */
-    var $hashboinc;
+    var string $txid;
+    var int $version;
+    var int $size;
+    var int $time;
+    var int $locktime;
+    var string $hashboinc;
     /** @var Contracts[] */
     var array $contracts;
-    
     /** @var Vin[] */
     var array $vin;
-    
     /** @var Vout[] */
-    var array $vout;
-    
-    /** @var string */
+    var array $vout;    
     var string $blockhash;
-
-    /** @var int */
     var int $confirmations;
 
     public function getStakingAddress() {

@@ -1,3 +1,13 @@
 {
-    "php.version": "8.2.5"
+    "php.version": "8.2.5",
+    "todo-tree.filtering.useBuiltInExcludes": "file and search excludes",
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/test*/**": true
+    }
 }
