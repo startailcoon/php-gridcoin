@@ -16,11 +16,8 @@ The code is written as a static Class, which means we set everything once, and n
 ```
 use phpGridcoin\Wallet;
 
-// Optionally set a node, otherwise use public nodes set in the code
-Wallet::addNode("localhost","25712","myRPCUser","myRPCPasswd");
-
-// Optionally set allowPublicNodes to add fallbacks
-Wallet::setAllowPublicNodes();
+// Connect to your local wallet
+Wallet::setNode("localhost","25712","myRPCUser","myRPCPasswd");
 
 // Get Current Block Count
 $currentBlockCount = Wallet::getblockcount();
@@ -32,8 +29,22 @@ rpcuser=myRPCUser
 rpcpassword=myRPCPasswd
 rpcport=25712
 ```
+---
+## Public API
+
+You can host a public API node using the included API script in `API/api.php`.
+This JSON API can be used with [startailcoon/js-gridcoin](https://github.com/startailcoon/js-gridcoin), a future project to come.
 
 ---
 ## Wallet Commands
 
 Not all wallet commands have been added, see the list of [Wallet Commands](https://github.com/startailcoon/phpGridcoin/issues/1) here.
+
+---
+## Development and Testing
+
+When adding new features, please make sure to add a phpunit testcase to it. 
+
+Testcases are in the `/test` folder. Functions start with `test`, example `testGetBlocks()`.
+
+Make sure that `/vendor/bin/phpunit` does not fail when pushing new code.
