@@ -73,14 +73,22 @@ class Wallet {
      * @param int $block_number The block number to get
      * @return Block The Block model
      */
-    public static function getblockbynumber(int $block_number):Block {
-        return (new JsonMapper())->map(
-            Wallet::execute(
-                "getblockbynumber", 
-                array($block_number)
-            ), 
-            new Block()
+    public static function getblockbynumber(int $block_number):Block|null {
+        $jm = new JsonMapper();
+        $jm->classMap[Models\Transaction::class] = function($class, $jvalue, $pjson) {
+            return Models\Block::determineTxClass($class, $jvalue, $pjson);
+        };
+        
+        $result = Wallet::execute(
+            "getblockbynumber", 
+            array($block_number)
         );
+
+        return empty($result) ? null : 
+            $jm->map(
+                $result, 
+                new Block()
+            );
     }
 
     /**
@@ -96,14 +104,17 @@ class Wallet {
             return Models\Block::determineTxClass($class, $jvalue, $pjson);
         };
 
-        return $jm->mapArray(
-            Wallet::execute(
-                "getblocksbatch", 
-                array($startBlockNoOrHash, $blocksToFetch, $txInfo)
-            )->blocks, 
-            array(), 
-            'phpGridcoin\Models\Block'
+        $result = Wallet::execute(
+            "getblocksbatch", 
+            array($startBlockNoOrHash, $blocksToFetch, $txInfo)
         );
+        
+        return empty($result) ? null : 
+            $jm->mapArray(
+                $result->blocks, 
+                array(), 
+                'phpGridcoin\Models\Block'
+            );
     }
 
     /**
@@ -121,13 +132,6 @@ class Wallet {
             "gettransaction", 
             array($txid)
         );
-
-        if($result === null) {
-            Wallet::$error_code = 404;
-            Wallet::$error_message = "No Transaction with the txid of '{$txid}' was found";
-
-            return null;
-        }
 
         return $jm->map($result, new Transaction());
     }
@@ -152,10 +156,13 @@ class Wallet {
      * @return ContractVoteClaim The ContractVoteClaim model
      */
     public static function getvotingclaim(string $poll_or_vote_id) {
-        return (new JsonMapper)->map(
-            Wallet::execute("getvotingclaim", array($poll_or_vote_id)),
-            new ContractVoteClaim()
-        );
+        $result = Wallet::execute("getvotingclaim", array($poll_or_vote_id));
+
+        return empty($result) ? null :
+            (new JsonMapper)->map(
+                $result,
+                new ContractVoteClaim()
+            );
     }
 
     // Wallet RPC Functions below

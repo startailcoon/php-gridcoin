@@ -1,0 +1,307 @@
+openapi: '3.0.2'
+info:
+  title: Gridcoin Wallet RPC API
+  version: '1.0'
+servers:
+  - url: https://api.gridcoinstats.eu/v1
+paths:
+  /getblockcount:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: integer
+                example: 123456
+  /gettransaction:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+  /getblockbynumber:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Block'
+components:
+  schemas:
+    Block: 
+      type: object
+      properties:
+        hash: 
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        size: 
+          type: integer
+          example: 123456
+        height: 
+          type: integer
+          example: 123456
+        version:
+          type: integer
+          example: 1
+        merkleroot:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        mint: 
+          type: number
+          example: 123.456
+        MoneySupply: 
+          type: integer
+          example: 123456
+        time: 
+          type: integer
+          example: 123456
+        nonce: 
+          type: integer
+          example: 123456
+        bits: 
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        difficulty:
+          type: number
+          example: 123.456
+        blocktrust:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        chaintrust:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        previousblockhash:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        flags:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        proofhash:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        entropybit:
+          type: integer
+          example: 123456
+        modifier:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        tx: 
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        claim: 
+          type: object
+          $ref: '#/components/schemas/BlockClaim'
+        fees_collected:
+          type: number
+          example: 123.456
+        superblock:
+          type: object
+          $ref: '#/components/schemas/Superblock'
+        IsSuperblock: 
+          type: boolean
+          example: true
+        IsContract:
+          type: boolean
+          example: true
+    Superblock: 
+      type: object
+      properties:
+        version: 
+          type: integer
+          example: 1
+        magnitudes:
+          type: array
+          items: 
+            type: number ## TODO: Check if this is correct
+        projects:
+          type: object
+          properties:
+            average_rac:
+              type: number
+              example: 123.456
+            rac:
+              type: number
+              example: 123.456
+            total_credit:
+              type: number
+              example: 123.456
+    BlockClaim:
+      type: object  
+      properties:
+        version: 
+          type: integer
+          example: 1
+        mining_id:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        client_version:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        organization:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        block_subsidy:
+          type: number
+          example: 123.456
+        research_subsidy:
+          type: number
+          example: 123.456
+        magnitude:
+          type: integer
+          example: 123456
+        magnitude_unit:
+          type: number
+          example: 123.456
+        fees_to_staker:
+          type: number
+          example: 123.456
+        m_mrc_tx_map_size:
+          type: string
+        mrcs:
+          type: object
+          $ref: '#/components/schemas/ContractMRC'
+        signature:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        quorum_hash:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        quorum_address:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+    ContractMRC:
+      type: object
+      properties:
+        version:
+          type: integer
+          example: 1
+        cpid: 
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        client_version:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        organization:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        research_subsidy:
+          type: number
+          example: 123.456
+        fee:
+          type: number
+          example: 123.456
+        magnitude:
+          type: integer
+          example: 123456
+        magnitude_unit:
+          type: number
+          example: 123.456
+        last_block_hash:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        signature:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+    Transaction:
+      type: object
+      properties:
+        txid:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        version:
+          type: integer
+          example: 1
+        size:
+          type: integer
+          example: 123
+        locktime:
+          type: integer
+          example: 0
+        hashboinc:
+          $ref: '#/components/schemas/Contract'
+        vin:
+          $ref: '#/components/schemas/Vin'
+        vout:
+          $ref: '#/components/schemas/Vout'
+        blockhash:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        confirmations:
+          type: integer
+          example: 123456
+    Vin:
+      type: object
+      properties:
+        coinbase:
+          type: integer
+          example: 123456
+        sequence:
+          type: integer
+          example: 123456
+        txid:
+          type: string
+          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+        vout:
+          type: integer
+          example: 123456
+        scriptSig:
+          type: object
+          properties:
+            asm:
+              type: string
+              example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+            hex:
+              type: string
+              example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+    Vout:
+      type: object
+      properties:
+        value:
+          type: number
+          example: 123.456
+        n:
+          type: integer
+          example: 123456
+        scriptPubKey:
+          type: object
+          properties:
+            asm:
+              type: string
+              example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+            hex:
+              type: string
+              example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+            reqSigs:
+              type: integer
+              example: 123456
+            type:
+              type: string
+              example: 'pubkeyhash'
+            addresses:
+              type: array
+              items:
+                type: string
+                example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+    Contract:
+      type: object
+      properties:
+        version: 
+          type: integer
+          example: 1
+        type:
+          type: string
+          example: 'boinc'
+        action:
+          type: string
+          example: 'create'
+        body:
+          $ref: '#/components/schemas/ContractBody'
+          

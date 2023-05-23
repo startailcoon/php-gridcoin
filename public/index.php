@@ -82,55 +82,13 @@ $errorMiddleware->setDefaultErrorHandler($errorHandler);
 // HttpException                -- 500, An internal error has occurred while processing your request.
 // HttpNotImplementedException  -- 501, Method is not implemented
 
-$app->get('/getblockcount', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
-    $payload = json_encode([Wallet::getBlockCount()], JSON_PRETTY_PRINT);
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');;
-}); 
-
-$app->get('/gettransaction/{txid}', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
-    $txid = $args['txid'];
-
-    // Verify that the TxID is valid
-    if(!preg_match('/^[0-9a-f]{64}$/i', $txid)) {
-        throw new HttpBadRequestException($request, 'Bad request. Transaction id is invalid');
-    }
-
-    $result = Wallet::getTransaction($txid);
-
-    // Verify that the transaction exists
-    if(is_null($result)) {
-        throw new HttpNotFoundException($request, 'A transaction with that id was not found');
-    } 
-    
-    $payload = json_encode($result, JSON_PRETTY_PRINT);
-    $response->getBody()->write($payload);
-    return $response->withHeader('Content-Type', 'application/json');;
-});
+foreach(glob(__DIR__ . '/routes/*.php') as $route) {
+    require $route;
+}
 
 // End of Routes
 // ------------------------------------
 // Run the application
-
-// Handle Request URI routing
-// https://www.slimframework.com/docs/v4/objects/request.html#route-object
-// $app->add(function (ServerRequestInterface $request, RequestHandlerInterface $handler) {
-
-//     // Get the requested function
-//     $params = explode('/', $request->getUri()->getPath());
-//     $function = $params[1];
-//     array_shift($params);
-//     array_shift($params);
-
-//     // Call the function if it exists
-//     if(method_exists('phpGridcoin\Wallet', $function)) {
-//         $response = call_user_func_array(['phpGridcoin\Wallet', $function], [...$params]);
-//     }
-
-//     $request->withAttribute('response', $response);
-
-//     return $handler->handle($request);
-// });
 
 $app->run();
 
