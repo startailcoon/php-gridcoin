@@ -1,16 +1,16 @@
 <?php
 
-use phpGridcoin\Wallet;
+use CoonDesign\phpGridcoin\Routes\GetBlocksBatch;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
 
-$app->get('/getblocksbatch/{startBlock:[0-9]+}/{blocksToFetch:[0-9]+}[/{txinfo}]', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
+$app->get('/getblocksbatch/{startBlock:[0-9]+}/{blocksToFetch:[0-9]+}[/{txinfo:[0-1]}]', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
     $startBlock = $args['startBlock'];
     $blocksToFetch = $args['blocksToFetch'];
     $txinfo = isset($args['txinfo']) ? $args['txinfo'] : false;
 
-    $result = Wallet::getblocksbatch($startBlock, $blocksToFetch, $txinfo);
+    $result = GetBlocksBatch::execute($startBlock, $blocksToFetch, $txinfo);
 
     // Verify that the transaction exists
     if(is_null($result)) {
@@ -27,7 +27,7 @@ $app->get('/getblocksbatch/{blockHash:[a-z0-9]+}/{blocksToFetch:[0-9]+}[/{txinfo
     $blocksToFetch = $args['blocksToFetch'];
     $txinfo = isset($args['txinfo']) ? $args['txinfo'] : false;
 
-    $result = Wallet::getblocksbatch($blockHash, $blocksToFetch, $txinfo);
+    $result = GetBlocksBatch::init($blockHash, $blocksToFetch, $txinfo);
 
     // Verify that the transaction exists
     if(is_null($result)) {

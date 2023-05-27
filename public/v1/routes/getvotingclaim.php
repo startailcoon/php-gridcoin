@@ -1,13 +1,14 @@
 <?php
 
-use phpGridcoin\Wallet;
+use CoonDesign\phpGridcoin\Routes\GetVotingClaim;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
 
 $app->get('/getvotingclaim/{poll_or_vote_id}', function (ServerRequestInterface $request, ResponseInterface $response, $args) {
-    $wallet = new Wallet();
-    $votingclaim = $wallet->getVotingClaim($args['poll_or_vote_id']);
+    $poll_or_vote_id = $args['poll_or_vote_id'];
+
+    $votingclaim = GetVotingClaim::execute($poll_or_vote_id);
 
     if($votingclaim == null) {
         throw new HttpNotFoundException($request, 'Voting claim not found');

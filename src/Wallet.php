@@ -1,19 +1,25 @@
 <?php
 
-namespace phpGridcoin;
+namespace CoonDesign\phpGridcoin;
 
-use phpGridcoin\Models\Block;
-use phpGridcoin\Models\Transaction;
-use phpGridcoin\Models\ContractBody;
-use phpGridcoin\Models\ContractVoteClaim;
+use CoonDesign\phpGridcoin\Models\Block;
+use CoonDesign\phpGridcoin\Models\Transaction;
+use CoonDesign\phpGridcoin\Models\ContractBody;
+use CoonDesign\phpGridcoin\Models\ContractVoteClaim;
 
 use Exception;
 use JsonMapper;
 use Curl;
 
-require_once __DIR__ . "/models/block.php";
-require_once __DIR__ . "/models/transaction.php";
-require_once __DIR__ . "/models/contract.php";
+// Load all models
+foreach(glob(__DIR__ . "/models/*.php") as $file) {
+    require_once $file;
+}
+
+// Load all routes
+foreach(glob(__DIR__ . "/routes/*.php") as $file) {
+    require_once $file;
+}
 
 /**
  * Gridcoin Wallet Class
@@ -60,110 +66,17 @@ class Wallet {
     // These methods are the RPC methods that are used to communicate with the wallet
     // They all coresponds to a method in the wallet RPC
     
-    /**
-     * Get the current block count
-     * @return int The current block count
-     */
-    public static function getblockcount():int {
-        return Wallet::execute("getblockcount");
-    }
 
-    /**
-     * Get the Block model by block number
-     * @param int $block_number The block number to get
-     * @return Block The Block model
-     */
-    public static function getblockbynumber(int $block_number):Block|null {
-        $jm = new JsonMapper();
-        $jm->classMap[Models\Transaction::class] = function($class, $jvalue, $pjson) {
-            return Models\Block::determineTxClass($class, $jvalue, $pjson);
-        };
-        
-        $result = Wallet::execute(
-            "getblockbynumber", 
-            array($block_number)
-        );
 
-        return empty($result) ? null : 
-            $jm->map(
-                $result, 
-                new Block()
-            );
-    }
 
-    /**
-     * Get a batch of blocks
-     * @param int $startBlockNoOrHash The block number or hash to start from
-     * @param int $blocksToFetch The amount of blocks to fetch
-     * @param bool $txInfo Whether to include transaction info
-     * @return Block[] An array of Block models
-     */
-    public static function getblocksbatch($startBlockNoOrHash, int $blocksToFetch, bool $txInfo = false) {
-        $jm = new JsonMapper();
-        $jm->classMap[Models\Transaction::class] = function($class, $jvalue, $pjson) {
-            return Models\Block::determineTxClass($class, $jvalue, $pjson);
-        };
 
-        $result = Wallet::execute(
-            "getblocksbatch", 
-            array($startBlockNoOrHash, $blocksToFetch, $txInfo)
-        );
-        
-        return empty($result) ? null : 
-            $jm->mapArray(
-                $result->blocks, 
-                array(), 
-                'phpGridcoin\Models\Block'
-            );
-    }
+   
 
-    /**
-     * Get a transaction by txid
-     * @param string $txid The transaction id
-     * @return Transaction The Transaction model
-     */
-    public static function gettransaction(string $txid):Transaction|null {
-        $jm = new JsonMapper();
-        $jm->classMap[ContractBody::class] = function($class, $jvalue, $pjson) {
-            return ContractBody::determineClass($class, $jvalue, $pjson);
-        };
 
-        $result = Wallet::execute(
-            "gettransaction", 
-            array($txid)
-        );
 
-        return $jm->map($result, new Transaction());
-    }
 
-    /**
-     * Get the blockchain mempool
-     * @return Transaction[] An array of Transaction models
-     */
-    public static function getrawmempool() {
-        $map_tx = array();
-        $mempool = (array)Wallet::execute("getrawmempool");
-        foreach($mempool as $txid) {
-            $map_tx[] = self::gettransaction($txid); 
-        }
 
-        return $map_tx;
-    }
 
-    /**
-     * Get voting claim by Transaction hash of the poll or vote.
-     * @param string $poll_or_vote_id Transaction hash of the poll or vote.
-     * @return ContractVoteClaim The ContractVoteClaim model
-     */
-    public static function getvotingclaim(string $poll_or_vote_id) {
-        $result = Wallet::execute("getvotingclaim", array($poll_or_vote_id));
-
-        return empty($result) ? null :
-            (new JsonMapper)->map(
-                $result,
-                new ContractVoteClaim()
-            );
-    }
 
     // Wallet RPC Functions below
     // --------------------------------------------------------------------------------------------
@@ -173,12 +86,13 @@ class Wallet {
     /**
      * Catch all for unknown methods
      */
-    public static function __callStatic($name, $args) {
-        Wallet::$error_code = 404;
-        Wallet::$error_message = "Invalid method '" . $name . "' with args: " . json_encode($args);
-    }
+    // public static function __callStatic($name, $args) {
+    //     printf("Unknown method %s with args: %s\n", $name, json_encode($args));
+    //     Wallet::$error_code = 404;
+    //     Wallet::$error_message = "Invalid method '" . $name . "' with args: " . json_encode($args);
+    // }
 
-    private static function execute(string $method, array $parameter = array()) {
+    public static function execute(string $method, array $parameter = array()) {
         $result = Wallet::getRPC()->execute($method, $parameter);
 
         if($result) { return $result; }

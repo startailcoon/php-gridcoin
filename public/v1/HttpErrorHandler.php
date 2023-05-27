@@ -1,6 +1,6 @@
 <?php
 
-namespace phpGridcoin\ErrorHandlers;
+namespace CoonDesign\phpGridcoin\ErrorHandlers;
 
 use Psr\Http\Message\ResponseInterface;
 use Slim\Exception\HttpBadRequestException;
@@ -72,8 +72,7 @@ class HttpErrorHandler extends ErrorHandler
         ];
         
         $payload = json_encode($error, JSON_PRETTY_PRINT);
-        
-        // printf("Exception: %s, %s\n\n", $exception->getCode(), $exception->getMessage());   
+
         $response = $this->responseFactory->createResponse($statusCode);        
         $response->getBody()->write($payload);
         

@@ -3,7 +3,7 @@ info:
   title: Gridcoin Wallet RPC API
   version: '1.0'
 servers:
-  - url: https://api.gridcoinstats.eu/v1
+  - url: https://dev.api.gridcoinstats.eu:8888/v1
 paths:
   /getblockcount:
     get:

@@ -1,6 +1,6 @@
 <?php
 
-namespace phpGridcoin\Models;
+namespace CoonDesign\phpGridcoin\Models;
 
 require_once __DIR__ . "/contract_beacon.php";
 require_once __DIR__ . "/contract_claim.php";
