@@ -1,7 +1,7 @@
 <?php
-namespace phpGridcoin\ErrorHandlers;
+namespace CoonDesign\phpGridcoin\ErrorHandlers;
 
-use phpGridcoin\ErrorHandlers\HttpErrorHandler;
+use CoonDesign\phpGridcoin\ErrorHandlers\HttpErrorHandler;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpInternalServerErrorException;
 use Slim\ResponseEmitter;
@@ -36,9 +36,9 @@ class ShutdownHandler
         $this->displayErrorDetails = $displayErrorDetails;
     }
 
-    public function __invoke()
-    {
+    public function __invoke() {
         $error = error_get_last();
+
         if ($error) {
             $errorFile = $error['file'];
             $errorLine = $error['line'];

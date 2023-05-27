@@ -14,7 +14,7 @@ The code is written as a static Class, which means we set everything once, and n
 ## Wallet Interactions
 
 ```
-use phpGridcoin\Wallet;
+use CoonDesign\phpGridcoin\Wallet;
 
 // Connect to your local wallet
 Wallet::setNode("localhost","25712","myRPCUser","myRPCPasswd");
@@ -32,9 +32,7 @@ rpcport=25712
 ---
 ## Public API
 
-You can host a public API node using the included API script in `API/api.php`.
-This JSON API can be used with [startailcoon/js-gridcoin](https://github.com/startailcoon/js-gridcoin), a future project to come.
-
+TODO: Write how to do this here
 ---
 ## Wallet Commands
 

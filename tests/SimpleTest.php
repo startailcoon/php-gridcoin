@@ -2,8 +2,8 @@
 
 require_once __DIR__ . "/../src/models/contract.php";
 
-use phpGridcoin\Wallet;
-use phpGridcoin\Models\ContractBeacon;
+use CoonDesign\phpGridcoin\Wallet;
+use CoonDesign\phpGridcoin\Models\ContractBeacon;
 
 class SimpleTest extends \PHPUnit\Framework\TestCase {
 

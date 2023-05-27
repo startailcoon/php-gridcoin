@@ -1,6 +1,6 @@
 <?php
 
-use phpGridcoin\Wallet;
+use CoonDesign\phpGridcoin\Routes\GetTransation;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpBadRequestException; 
@@ -14,7 +14,7 @@ $app->get('/gettransaction/{txid}', function (ServerRequestInterface $request, R
         throw new HttpBadRequestException($request, 'Bad request. Transaction id is invalid');
     }
 
-    $result = Wallet::getTransaction($txid);
+    $result = GetTransation::execute($txid);
 
     // Verify that the transaction exists
     if(is_null($result)) {

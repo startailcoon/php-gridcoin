@@ -1,6 +1,6 @@
 <?php
 
-namespace phpGridcoin\Models;
+namespace CoonDesign\phpGridcoin\Models;
 
 class ContractProject {
     var int $version;

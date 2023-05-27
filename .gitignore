@@ -7,4 +7,4 @@ composer.lock
 .settings
 .phpunit.result.cache
 /logs*
-vhost.conf
+vhost*.conf

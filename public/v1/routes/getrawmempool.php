@@ -1,12 +1,11 @@
 <?php
 
-use phpGridcoin\Wallet;
+use CoonDesign\phpGridcoin\Routes\GetRawMempool;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 $app->get('/getrawmempool', function (ServerRequestInterface $request, ResponseInterface $response, $args) {
-    $wallet = new Wallet();
-    $rawmempool = $wallet->getRawMemPool();
+    $rawmempool = GetRawMempool::execute();
     $response->getBody()->write(json_encode($rawmempool));
     return $response->withHeader('Content-Type', 'application/json');
 });
