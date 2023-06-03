@@ -23,7 +23,6 @@
         }
     ],
     "require": {
-        "coon-design/rate-limit": "dev-master",
         "netresearch/jsonmapper": "dev-classMapFix",
         "curl/curl": "^2.5",
         "php": ">=8",
