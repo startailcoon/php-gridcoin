@@ -2,13 +2,7 @@
 
 namespace CoonDesign\phpGridcoin;
 
-use CoonDesign\phpGridcoin\Models\Block;
-use CoonDesign\phpGridcoin\Models\Transaction;
-use CoonDesign\phpGridcoin\Models\ContractBody;
-use CoonDesign\phpGridcoin\Models\ContractVoteClaim;
-
 use Exception;
-use JsonMapper;
 use Curl;
 
 // Load all models
@@ -37,6 +31,7 @@ class Wallet {
     private static int $port;
     private static string $user;
     private static string $pass;
+    public static int $timeout = 10;
     
     /**
      * Set the RPC to be a public node RPC
@@ -44,6 +39,10 @@ class Wallet {
      */
     public static function setIsPrivateNode() {
         Wallet::$isPrivateNode = true;
+    }
+
+    public static function setTimeout(int $timeout) {
+        Wallet::$timeout = $timeout;
     }
 
     public static function getErrorCode() {
@@ -67,17 +66,6 @@ class Wallet {
     // They all coresponds to a method in the wallet RPC
     
 
-
-
-
-   
-
-
-
-
-
-
-
     // Wallet RPC Functions below
     // --------------------------------------------------------------------------------------------
     // These functions are not part of the Gridcoin Wallet RPC
@@ -93,6 +81,7 @@ class Wallet {
     // }
 
     public static function execute(string $method, array $parameter = array()) {
+        // printf("Executing method %s with args: %s\n", $method, json_encode($parameter));
         $result = Wallet::getRPC()->execute($method, $parameter);
 
         if($result) { return $result; }
@@ -161,7 +150,7 @@ class WalletRPC {
 
     private function get_result($method, $parameter) {
         $curl = new Curl\Curl();
-        $curl->setOpt(CURLOPT_TIMEOUT, 30);
+        $curl->setOpt(CURLOPT_TIMEOUT, Wallet::$timeout);
         if($this->user && $this->pass) {
             $curl->setBasicAuthentication($this->user, $this->pass);
         }
@@ -247,6 +236,128 @@ class WalletException extends Exception {
     public function __construct($message='') {
         parent::__construct($message);
     }
+}
+
+class WalletCache {
+    const REDIS = 1;
+    const MEMCACHE = 1 << 1;
+
+    /**
+     * @var null|string
+     */
+    public $host = null;
+
+    /**
+     * @var null|string
+     */
+    public $port = null;
+
+    /**
+     * @var null
+     */
+    public $pass = null;
+
+    protected $enabled = false;
+
+    protected $handle = null;
+
+    protected $storageType = null;
+
+    public function __construct($host = 'localhost', $port = '6379', $pass = null)
+    {
+        $this->host = $host;
+        $this->port = $port;
+        $this->pass = $pass;
+
+        $this->useRedis();
+
+        if ($this->pass !== null)
+            $this->auth();
+    }
+
+
+    public function auth()
+    {
+        if ($this->storageType === self::REDIS) {
+            $this->handle->auth($this->pass);
+        }
+        return $this;
+    }
+
+    public function useMemcache()
+    {
+        $this->enabled = false;
+        $this->storageType = self::MEMCACHE;
+        if (!class_exists('\Memcache')) {
+            return $this;
+        }
+        $this->handle = new \Memcache;
+        $connected = @$this->handle->connect($this->host, intval($this->port));
+        if ($connected) {
+            $this->enabled = true;
+        }
+        return $this;
+    }
+
+    public function useRedis()
+    {
+        $this->enabled = false;
+        $this->storageType = self::REDIS;
+        $address = sprintf("%s:%s", $this->host, $this->port);
+        if (@stream_socket_client($address) === false) {
+            return $this;
+        }
+        $this->handle = new \TinyRedisClient($address);
+        $this->enabled = true;
+        return $this;
+    }
+
+    public function get($uniqueID)
+    {
+        switch ($this->storageType) {
+            case self::MEMCACHE:
+            case self::REDIS:
+                // Luckily Redis and Мemcache interfaces are the same in this case.
+                $data = $this->handle->get($uniqueID);
+                
+                return $data;
+        }
+        return null;
+    }
+
+    public function set($uniqueID, $data, $ttl = 900) {
+        switch ($this->storageType) {
+            case self::REDIS:
+                $this->handle->set($uniqueID, $data);
+                $this->handle->expire($uniqueID, $ttl);
+                break;
+            case self::MEMCACHE:
+                $this->handle->set($uniqueID, $data, 0, $ttl);
+                break;
+        }
+    }
+
+    public function destroy($uniqueID) {
+        switch ($this->storageType) {
+            case self::REDIS:
+                $this->handle->del($uniqueID);
+                break;
+            case self::MEMCACHE:
+                $this->handle->delete($uniqueID);
+                break;
+        }
+    }
+    
+    public function exists($uniqueID) {
+        switch ($this->storageType) {
+            case self::REDIS:
+                return $this->handle->exists($uniqueID);
+            case self::MEMCACHE:
+                return $this->handle->get($uniqueID) !== false;
+        }
+        return false;
+    }
+
 }
 
 ?>

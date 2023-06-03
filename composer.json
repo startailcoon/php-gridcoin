@@ -16,8 +16,19 @@
     "support": {
         "issues": "https://github.com/startailcoon/php-gridcoin/issues"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/startailcoon/rate-limit"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/startailcoon/jsonmapper"
+        }
+    ],
     "require": {
-        "netresearch/jsonmapper": "^4.2.0",
+        "netresearch/jsonmapper": "dev-classMapFix",
+        "prezto/rate-limit": "dev-slim4-fix",
         "curl/curl": "^2.5",
         "php": ">=8",
         "ext-json": "*",
@@ -26,8 +37,7 @@
         "ext-xml": "*",
         "ext-bcmath": "*",
         "slim/slim":"4.*",
-        "slim/psr7": "^1.6",
-        "coon-design/rate-limit": "^0.3.1"
+        "slim/psr7": "^1.6"
     },
     "require-dev": {
         "phpunit/phpunit": "~7.5 || ~8.0 || ~9.0 || ~10.0",

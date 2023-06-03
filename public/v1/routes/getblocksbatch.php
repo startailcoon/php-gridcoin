@@ -27,7 +27,7 @@ $app->get('/getblocksbatch/{blockHash:[a-z0-9]+}/{blocksToFetch:[0-9]+}[/{txinfo
     $blocksToFetch = $args['blocksToFetch'];
     $txinfo = isset($args['txinfo']) ? $args['txinfo'] : false;
 
-    $result = GetBlocksBatch::init($blockHash, $blocksToFetch, $txinfo);
+    $result = GetBlocksBatch::execute($blockHash, $blocksToFetch, $txinfo);
 
     // Verify that the transaction exists
     if(is_null($result)) {

@@ -2,6 +2,8 @@
 
 require_once __DIR__ . "/../src/models/contract.php";
 
+use CoonDesign\phpGridcoin\Routes\GetBestBlockHash;
+use CoonDesign\phpGridcoin\Routes\GetBlockByNumber;
 use CoonDesign\phpGridcoin\Wallet;
 use CoonDesign\phpGridcoin\Models\ContractBeacon;
 
@@ -12,6 +14,18 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
         $this->assertIsBool(true);
     }
 
+    function testGetBestBlockHash() {
+        $this->assertIsString(GetBestBlockHash::execute());
+    }
+
+    function testGetBlockByNumber() {
+        $result = GetBlockByNumber::execute(1);
+        $this->assertIsObject($result);
+        $this->assertObjectHasProperty("hash", $result);
+    }
+
+    ## TODO: Fix the rest of the tests
+    
     public function testGetBlockCount() {
         $this->assertIsInt(Wallet::getblockcount());
     }

@@ -42,7 +42,7 @@ $app->setBasePath('/v1');
 // Limits per requester IP address, x requests per y seconds
 // Default is 30 requests per 60 seconds
 
-$rateLimitMiddleware = new \CoonDesign\RateLimit\RateLimitMiddleware();
+$rateLimitMiddleware = new \Prezto\RateLimit\RateLimitMiddleware();
 $rateLimitMiddleware->setRequestsPerSecond(30, 60);
 $rateLimitMiddleware->setHandler(function ($request) {
     throw new Exception\HttpRateLimitException($request, 'Rate limit exceeded. Slow down.');
