@@ -19,16 +19,12 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/startailcoon/rate-limit"
-        },
-        {
-            "type": "vcs",
             "url": "https://github.com/startailcoon/jsonmapper"
         }
     ],
     "require": {
+        "coon-design/rate-limit": "dev-master",
         "netresearch/jsonmapper": "dev-classMapFix",
-        "prezto/rate-limit": "dev-slim4-fix",
         "curl/curl": "^2.5",
         "php": ">=8",
         "ext-json": "*",
