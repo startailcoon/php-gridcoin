@@ -9,9 +9,9 @@ class GetBlockHash {
         /**
         * Get the block hash by number
         * @param int $number The block number
-        * @return string The block hash
+        * @return null|string The block hash
         */
-        public static function execute(int $number):string|null {
+        public static function execute(int $number) {
             return Wallet::execute("getblockhash", [$number]);
         }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace CoonDesign\phpGridcoin\Models;
+namespace CoonDesign\phpGridcoin\Models\Wallet;
 
 class BlockchainInfo {
     var int $blocks;

@@ -5,8 +5,8 @@ namespace CoonDesign\phpGridcoin\Routes;
 use CoonDesign\phpGridcoin\WalletInterface;
 use CoonDesign\phpGridcoin\Wallet;
 
-use CoonDesign\phpGridcoin\Models\Block;
-use CoonDesign\phpGridcoin\Models\Transaction;
+use CoonDesign\phpGridcoin\Models\Chain\Block;
+use CoonDesign\phpGridcoin\Models\Chain\Transaction;
 
 use JsonMapper;
 
@@ -17,7 +17,7 @@ class GetBlocksBatch {
      * @param int $startBlockNoOrHash The block number or hash to start from
      * @param int $blocksToFetch The amount of blocks to fetch
      * @param bool $txInfo Whether to include transaction info
-     * @return Block[] An array of Block models
+     * @return null|Block[] An array of Block models
      */
     public static function execute($startBlockNoOrHash, int $blocksToFetch, bool $txInfo = false) {
         $jm = new JsonMapper();
@@ -27,14 +27,14 @@ class GetBlocksBatch {
 
         $result = Wallet::execute(
             "getblocksbatch", 
-            array($startBlockNoOrHash, $blocksToFetch, $txInfo)
+            [$startBlockNoOrHash, $blocksToFetch, $txInfo]
         );
         
         return empty($result) ? null : 
             $jm->mapArray(
                 $result->blocks, 
                 array(), 
-                'CoonDesign\phpGridcoin\Models\Block'
+                'CoonDesign\phpGridcoin\Models\Chain\Block'
             );
     }
 

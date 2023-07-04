@@ -1,6 +1,6 @@
 <?php
 
-namespace CoonDesign\phpGridcoin\Models;
+namespace CoonDesign\phpGridcoin\Models\Chain;
 
 require_once __DIR__ . "/contract_beacon.php";
 require_once __DIR__ . "/contract_claim.php";
@@ -29,41 +29,42 @@ class ContractBody {
 
             switch(strtoupper($pjson->type)) {
                 case "SCRAPER":
-                    if(!isset($json->version))  return 'phpGridcoin\Models\ContractScraper';
+                    if(!isset($json->version))  return 'phpGridcoin\Models\Chain\ContractScraper';
                     break;
 
                 case "PROTOCOL":
-                    if(!isset($json->version))  return 'phpGridcoin\Models\ContractProtocol';
+                    if(!isset($json->version))  return 'phpGridcoin\Models\Chain\ContractProtocol';
                     break;
 
                 case "CLAIM":
-                    if($json->version <= 4)     return 'phpGridcoin\Models\ContractClaim';
+                    if($json->version <= 4)     return 'phpGridcoin\Models\Chain\ContractClaim';
                     break;
 
                 case "MRC":
-                    if($json->version <= 1)       return 'phpGridcoin\Models\ContractMRC';
+                    if($json->version <= 1)       return 'phpGridcoin\Models\Chain\ContractMRC';
                     break;
 
                 case "PROJECT":
-                    if($json->version <= 2)       return 'phpGridcoin\Models\ContractProject';
+                    if($json->version <= 2)       return 'phpGridcoin\Models\Chain\ContractProject';
                     break;
 
                 case "BEACON":
-                    if($json->version <= 2)       return 'phpGridcoin\Models\ContractBeacon';
+                    if($json->version <= 2)       return 'phpGridcoin\Models\Chain\ContractBeacon';
                     break;
 
                 case "POLL":
-                    if($json->version <= 3)       return 'phpGridcoin\Models\ContractPoll';
+                    if($json->version <= 3)       return 'phpGridcoin\Models\Chain\ContractPoll';
                     break;
 
                 case "VOTE":
-                    if(!isset($json->version))    return 'phpGridcoin\Models\ContractVoteLegacy';
-                    if($json->version == 1)       return 'phpGridcoin\Models\ContractVote';
+                    if(!isset($json->version))    return 'phpGridcoin\Models\Chain\ContractVoteLegacy';
+                    if($json->version == 1)       return 'phpGridcoin\Models\Chain\ContractVote';
                     break;
             }
 
         }
         
+        // Catch all for unknown contracts
         print_r($pjson);
         print_r($json);
         throw new \Exception("Missing Contracts Class '{$pjson->type}' v{$json->version}");

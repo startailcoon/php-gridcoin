@@ -6,10 +6,11 @@ use Slim\Exception\HttpNotFoundException;
 
 use CoonDesign\phpGridcoin\Routes\GetBlockByNumber;
 
-$app->get('/getblockbynumber/{height:[0-9]+}', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
+$app->get('/getblockbynumber/{height:[0-9]+}[/{txinfo:[0-1]}]', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
     $height = $args['height'];
+    $txinfo = isset($args['txinfo']) ? true : false;
 
-    $result = GetBlockByNumber::execute($height);
+    $result = GetBlockByNumber::execute($height, $txinfo);
 
     // Verify that the transaction exists
     if(is_null($result)) {

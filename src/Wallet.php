@@ -6,8 +6,10 @@ use Exception;
 use Curl;
 
 // Load all models
-foreach(glob(__DIR__ . "/models/*.php") as $file) {
-    require_once $file;
+foreach(glob(__DIR__ . "/models/*") as $dir) {
+    foreach(glob($dir . "/*.php") as $file) {
+        require_once $file;
+    }
 }
 
 // Load all routes

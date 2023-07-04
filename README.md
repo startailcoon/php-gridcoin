@@ -2,8 +2,6 @@
 
 phpGridcoin is a RPC connector in PHP for the Gridcoin Research wallet. It connects to a local or remote wallet to fetch chain information.
 
-**PLEASE BE AWARE**  that the current library is not working without the changes submitted to PR #209 on JSONMapper in https://github.com/cweiske/jsonmapper/pull/209
-
 
 
 ---
@@ -32,8 +30,8 @@ rpcport=25712
 ---
 ## Public API
 
-TODO: Write how to do this here
----
+TODO: Write how to use the API
+
 ## Wallet Commands
 
 Not all wallet commands have been added, see the list of [Wallet Commands](https://github.com/startailcoon/phpGridcoin/issues/1) here.
@@ -46,3 +44,19 @@ When adding new features, please make sure to add a phpunit testcase to it.
 Testcases are in the `/test` folder. Functions start with `test`, example `testGetBlocks()`.
 
 Make sure that `/vendor/bin/phpunit` does not fail when pushing new code.
+
+## Please note
+The current library is not working without the changes submitted to PR #209 on JSONMapper in https://github.com/cweiske/jsonmapper/pull/209
+Until these changes are merged, this repo and any that relies on this one requires the following code to the `composer.json` settings
+
+```
+"repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/startailcoon/jsonmapper"
+        }
+],
+"require": {
+    "netresearch/jsonmapper": "dev-classMapFix"
+}
+```

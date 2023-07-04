@@ -5,9 +5,9 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
 
-$app->get('/getblock/{hash:[a-z0-9]+}[/{txinfo:[0-1]}]', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
+$app->get('/getblock/{hash:[a-z0-9]+}[/{txinfo}]', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
     $hash = $args['hash'];
-    $txinfo = isset($args['txinfo']) ? $args['txinfo'] : false;
+    $txinfo = isset($args['txinfo']) && $args['txinfo'] == "true" ? true : false;
 
     $result = GetBlock::execute($hash, $txinfo);
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace CoonDesign\phpGridcoin\Models;
+namespace CoonDesign\phpGridcoin\Models\Chain;
 
 require_once __DIR__ . "/contract.php";
 

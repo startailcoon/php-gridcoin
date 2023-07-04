@@ -8,6 +8,7 @@ require __DIR__ . '/HttpErrorHandler.php';
 require __DIR__ . '/ShutdownHandler.php';
 require __DIR__ . '/HttpRateLimitException.php';
 
+use CoonDesign\RateLimit\RateLimitMiddleware;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Factory\AppFactory;
 use Slim\Factory\ServerRequestCreatorFactory;
@@ -42,7 +43,7 @@ $app->setBasePath('/v1');
 // Limits per requester IP address, x requests per y seconds
 // Default is 30 requests per 60 seconds
 
-$rateLimitMiddleware = new \Prezto\RateLimit\RateLimitMiddleware();
+$rateLimitMiddleware = new RateLimitMiddleware();
 $rateLimitMiddleware->setRequestsPerSecond(30, 60);
 $rateLimitMiddleware->setHandler(function ($request) {
     throw new Exception\HttpRateLimitException($request, 'Rate limit exceeded. Slow down.');
@@ -90,14 +91,14 @@ $errorMiddleware->setDefaultErrorHandler($errorHandler);
 
 // Load all routes from the routes directory
 // ------------------------------------
-$route = explode("/", str_replace('/v1/', '', $_SERVER['REQUEST_URI']));
+$route = explode("/", str_replace('/v1/', '', $_SERVER['REDIRECT_URL']));
 
 $route_file = __DIR__ . '/routes/' . $route[0] . '.php';
-if(file_exists($route_file)) {
-    require $route_file;
-} else {
-    throw new HttpNotFoundException($request, 'Route not found: ' . $route_file);
+if(!file_exists($route_file)) {
+    throw new HttpNotFoundException($request, 'Route not found: ' . $route_file . "Route: " . json_encode($route) . " Server: " . json_encode($_SERVER));
 }
+
+require $route_file;
 
 // Run the application
 $app->run();

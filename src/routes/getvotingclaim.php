@@ -3,7 +3,7 @@
 namespace CoonDesign\phpGridcoin\Routes;
 
 use CoonDesign\phpGridcoin\Wallet;
-use CoonDesign\phpGridcoin\Models\ContractVoteClaim;
+use CoonDesign\phpGridcoin\Models\Chain\ContractVoteClaim;
 
 use JsonMapper;
 
@@ -21,7 +21,7 @@ class GetVotingClaim {
         return empty($result) ? null :
             (new JsonMapper)->map(
                 $result,
-                new ContractVoteClaim()
+                new ContractVoteClaim
             );
     }
 

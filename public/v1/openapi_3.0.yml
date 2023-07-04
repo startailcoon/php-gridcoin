@@ -1,10 +1,79 @@
 openapi: '3.0.2'
 info:
   title: Gridcoin Wallet RPC API
-  version: '1.0'
+  version: '0.9.1'
 servers:
-  - url: https://dev.api.gridcoinstats.eu:8888/v1
+  - url: https://api.gridcoinstats.eu/v1
+    description: Main chain server
+  - url: https://dev-api.gridcoinstats.eu/v1
+    description: Main chain development server
+  - url: https://api.testnet.gridcoinstats.eu/v1
+    description: Testnet chain server
+  - url: https://dev-api.testnet.gridcoinstats.eu/v1
+    description: Testnet chain development server
 paths:
+  /getbestblockhash:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 3e80a5be7ab3ca952cdd3fe9d4390340d203743306cc481670431c53dd68b90a
+  /getblock/{hash}/{txinfo}:
+    get:
+      summary: Returns information about the given block hash.
+      parameters:
+        - name: hash
+          in: path
+          description: The block hash
+          required: true
+          schema:
+            type: string
+            example: 3e80a5be7ab3ca952cdd3fe9d4390340d203743306cc481670431c53dd68b90a
+        - name: txinfo
+          in: path
+          description: Whether to return transaction information
+          required: true
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Block'
+  /getblockbynumber/{blocknumber}:
+    get:
+      summary: Returns a specific block matching the given block number.
+      parameters:
+        - name: blocknumber
+          in: path
+          description: The block number
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Block'
+  /getblockchaininfo:
+    get:
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlockchainInfo'
   /getblockcount:
     get:
       responses:
@@ -15,8 +84,124 @@ paths:
               schema:
                 type: integer
                 example: 123456
-  /gettransaction:
+  /getblockhash/{blocknumber}:
     get:
+      summary: Returns the block hash of the given block number.
+      parameters:
+        - name: blocknumber
+          in: path
+          description: The block number
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 000003b082ab3c494b1cf529a6edbbf2d1acfe1cb189a7af799c377e0e5e8ed7
+  /getblocksbatch/{start}/{blocksToFetch}/{txinfo}:
+    get:
+      summary: Returns a list of block hashes between the given start and end block numbers.
+      parameters:
+        - name: start
+          in: path
+          description: The start block number
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: blocksToFetch
+          in: path
+          description: The number of blocks to fetch
+          required: true
+          schema:
+            type: integer
+            maximum: 100
+            example: 10
+        - name: txinfo
+          in: path
+          description: Whether to return transaction information
+          required: true
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Block'
+  /getburnreport:
+    get:
+      summary: Returns the burn report, which contains information about the amount of coins burned. This report has a long runtime!
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BurnReport'
+  /getdifficulty:
+    get:
+      summary: Returns the current difficulty.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Difficulty'
+  /getpollresults/{txid}:
+    get:
+      summary: Returns the poll results.
+      parameters:
+        - name: txid
+          in: path
+          description: The transaction id
+          required: true
+          schema:
+            type: string
+            example: 0fd52dfbf5d94e22965fb2f82ff5f0d4222284403a0061387c8f3d7f8543697f
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PollResults'
+  /getrawmempool:
+    get:
+      summary: Returns the raw mempool.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: 0fd52dfbf5d94e22965fb2f82ff5f0d4222284403a0061387c8f3d7f8543697f
+  /gettransaction/{txid}:
+    get:
+      summary: Returns a specific transaction matching the given transaction id.
+      parameters:
+        - name: txid
+          in: path
+          description: The transaction id
+          required: true
+          schema:
+            type: string
+            example: c93aa81dbdede0477f1aa8876029d1094642841361eaad0a1de02d8a8fe0376f
       responses:
         '200':
           description: OK
@@ -24,15 +209,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Transaction'
-  /getblockbynumber:
+  /getvotedetails/{txid}:
     get:
+      summary: Returns the vote details for the given transaction id.
+      parameters:
+        - name: txid
+          in: path
+          description: The transaction id
+          required: true
+          schema:
+            type: string
+            example: 0fd52dfbf5d94e22965fb2f82ff5f0d4222284403a0061387c8f3d7f8543697f
       responses:
         '200':
           description: OK
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Block'
+                $ref: '#/components/schemas/VoteDetails'
+  /getvotingclaim/{txid}:
+    get:
+      summary: Returns the voting claim for the given transaction id.
+      parameters:
+        - name: txid
+          in: path
+          description: The transaction id
+          required: true
+          schema:
+            type: string
+            example: 0a575a415f487245ee9948f89a2d185fcc6c02038367b4f34a5e443f1071a5ed
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VotingClaim'    
+  /getwalletinfo:
+    get:
+      summary: Returns the wallet information.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletInfo'
 components:
   schemas:
     Block: 
@@ -40,7 +262,7 @@ components:
       properties:
         hash: 
           type: string
-          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+          example: 000003b082ab3c494b1cf529a6edbbf2d1acfe1cb189a7af799c377e0e5e8ed7
         size: 
           type: integer
           example: 123456
@@ -52,7 +274,7 @@ components:
           example: 1
         merkleroot:
           type: string
-          example: 1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
+          example: c93aa81dbdede0477f1aa8876029d1094642841361eaad0a1de02d8a8fe0376f
         mint: 
           type: number
           example: 123.456
@@ -302,6 +524,253 @@ components:
         action:
           type: string
           example: 'create'
-        body:
-          $ref: '#/components/schemas/ContractBody'
-          
+    BlockchainInfo:
+      type: object
+      properties:
+        blocks:
+          type: integer
+        in_sync:
+          type: boolean
+        moneysupply:
+          type: number
+        difficulty:
+          type: object
+          properties:
+            current:
+              type: number
+            target:
+              type: number
+          required:
+            - current
+            - target
+          additionalProperties: false
+        testnet:
+          type: boolean
+        errors:
+          type: string
+      additionalProperties: false
+      required:
+        - blocks
+        - in_sync
+        - moneysupply
+        - difficulty
+        - testnet
+        - errors       
+    BurnReport:
+      type: object
+      properties:
+        total:
+          type: number
+        voluntary:
+          type: number
+        contracts:
+          type: object
+          properties:
+            beacon:
+              type: number
+            message:
+              type: number
+            poll:
+              type: number
+            project:
+              type: integer
+            protocol:
+              type: integer
+            scraper:
+              type: integer
+            vote:
+              type: number
+            mrc:
+              type: number
+          required:
+            - beacon
+            - message
+            - poll
+            - project
+            - protocol
+            - scraper
+            - vote
+            - mrc
+          additionalProperties: false
+      additionalProperties: false
+      required:
+        - total
+        - voluntary
+        - contracts
+    Difficulty:
+      type: object
+      properties:
+        current:
+          type: number
+        target:
+          type: number
+      additionalProperties: false
+      required:
+        - current
+        - target
+    PollResults:
+      type: object
+      properties:
+        poll_id:
+          type: string
+        poll_title:
+          type: string
+        poll_expired:
+          type: boolean
+        starting_block_height:
+          type: integer
+        ending_block_height:
+          type: integer
+        votes:
+          type: integer
+        invalid_votes:
+          type: integer
+        total_weight:
+          type: number
+        active_vote_weight:
+          type: number
+        vote_percent_avw:
+          type: number
+        poll_results_validated:
+          type: boolean
+        top_choice_id:
+          type: integer
+        top_choice:
+          type: string
+        responses:
+          type: array
+          items:
+            type: object
+            properties:
+              choice:
+                type: string
+              id:
+                type: integer
+              weight:
+                type: number
+              votes:
+                type: integer
+            required:
+              - choice
+              - id
+              - weight
+              - votes
+      additionalProperties: false
+      required:
+        - poll_id
+        - poll_title
+        - poll_expired
+        - starting_block_height
+        - ending_block_height
+        - votes
+        - invalid_votes
+        - total_weight
+        - active_vote_weight
+        - vote_percent_avw
+        - poll_results_validated
+        - top_choice_id
+        - top_choice
+        - responses
+    VoteDetails:
+      type: array
+      items:
+        type: object
+        properties:
+          amount:
+            type: number
+          cpid:
+            type: string
+          total_weight:
+            type: number
+          answers:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                weight:
+                  type: number
+        required:
+          - amount
+          - cpid
+          - total_weight
+          - answers
+    VotingClaim:
+      type: object
+      properties:
+        version:
+          type: integer
+        magnitude_claim:
+          type: object
+          properties:
+            mining_id:
+              type: string
+            beacon_txid:
+              type: string
+            signature:
+              type: string
+          required:
+            - mining_id
+            - beacon_txid
+            - signature
+          additionalProperties: false
+        balance_claim:
+          type: array
+          items:
+            type: object
+            properties:
+              public_key:
+                type: string
+              signature:
+                type: string
+              outpoints:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    txid:
+                      type: string
+                    offset:
+                      type: integer
+            required:
+              - public_key
+              - signature
+              - outpoints
+      additionalProperties: false
+      required:
+        - version
+        - magnitude_claim
+        - balance_claim
+    WalletInfo:
+      type: object
+      properties:
+        walletversion:
+          type: integer
+        balance:
+          type: integer
+        newmint:
+          type: integer
+        stake:
+          type: integer
+        keypoololdest:
+          type: integer
+        keypoolsize:
+          type: integer
+        masterkeyid:
+          type: string
+        staking:
+          type: boolean
+        miningError:
+          type: string
+      additionalProperties: false
+      required:
+        - walletversion
+        - balance
+        - newmint
+        - stake
+        - keypoololdest
+        - keypoolsize
+        - masterkeyid
+        - staking
+        - miningError

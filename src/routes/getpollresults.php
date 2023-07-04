@@ -2,12 +2,12 @@
 
 namespace CoonDesign\phpGridcoin\Routes;
 
-use CoonDesign\phpGridcoin\Models\Wallet\BurnReport;
 use CoonDesign\phpGridcoin\Wallet;
 use CoonDesign\phpGridcoin\WalletCache;
+use CoonDesign\phpGridcoin\Models\Wallet\PollResults;
 use JsonMapper;
 
-class GetBurnReport {
+class GetPollResults {
 
     public static $error_code = 0;
     public static $error_message = "";
@@ -15,23 +15,24 @@ class GetBurnReport {
     public static $timeout = 180; // 3 minutes
 
     /**
-     * Get the burn report.
+     * Get the results of a poll
      * NOTE: This function has a longer runtime the default
-     * @var int $ttl Chace time to live in seconds
-     * @return null|BurnReport
+     * @var string $txid The transaction ID of the poll
+     * @var int $ttl Cache time to live in seconds
+     * @return PollResults|null
      */
-    public static function execute($ttl = null) {
+    public static function execute($txid, $ttl = null) {
         $ttl = $ttl ?? self::$ttl;
         
         $cache = new WalletCache;
 
-        if($cache->exists("burnreport")) {
-            return json_decode($cache->get("burnreport"));
+        if($cache->exists("getpollresults_{$txid}")) {
+            return json_decode($cache->get("getpollresults_{$txid}"));
         } 
 
         Wallet::setTimeOut(self::$timeout); // This needs to have a higher timeout than the default
 
-        $result = Wallet::execute("getburnreport");
+        $result = Wallet::execute("getpollresults", [$txid]);
 
         if($result == null) {
             self::$error_code = Wallet::getErrorCode();
@@ -39,13 +40,15 @@ class GetBurnReport {
             return null;
         }
 
-        $return = (new JsonMapper)->map($result, new BurnReport);
+        $return = (new JsonMapper)->map($result, new PollResults());
 
         // Store the result in cache
-        $cache->set("burnreport", json_encode($return), $ttl);
+        $cache->set("getpollresults_{$txid}", json_encode($return), $ttl);
 
         return $return;
+
     }
+
 }
 
 ?>

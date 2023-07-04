@@ -73,10 +73,17 @@ class HttpErrorHandler extends ErrorHandler
         
         $payload = json_encode($error, JSON_PRETTY_PRINT);
 
+        if($statusCode == 0) {
+            $response = $this->responseFactory->createResponse();
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json');
+        }
+
         $response = $this->responseFactory->createResponse($statusCode);        
         $response->getBody()->write($payload);
         
         return $response->withHeader('Content-Type', 'application/json');
+
     }
 }
 

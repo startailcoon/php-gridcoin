@@ -3,9 +3,7 @@
 namespace CoonDesign\phpGridcoin\Routes;
 
 use CoonDesign\phpGridcoin\Wallet;
-use CoonDesign\phpGridcoin\Models\Transaction;
-
-use CoonDesign\phpGridcoin\Routes\GetTransation;
+use CoonDesign\phpGridcoin\Models\Chain\Transaction;
 
 class GetRawMempool {
     /**
