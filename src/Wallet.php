@@ -34,6 +34,7 @@ class Wallet {
     private static string $user;
     private static string $pass;
     public static int $timeout = 10;
+    public static int $timer = 0;
     
     /**
      * Set the RPC to be a public node RPC
@@ -55,6 +56,14 @@ class Wallet {
         return Wallet::$error_message;
     }
     
+    public static function getTimer() {
+        return Wallet::$timer;
+    }
+
+    public static function resetTimer() {
+        Wallet::$timer = 0;
+    }
+
     public static function setNode(string $host, int $port, string $user, string $pass) {
         Wallet::$host = $host;
         Wallet::$port = $port;
