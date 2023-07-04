@@ -92,6 +92,8 @@ class Wallet {
     // }
 
     public static function execute(string $method, array $parameter = array()) {
+        Wallet::$timer = microtime(true);
+
         // printf("Executing method %s with args: %s\n", $method, json_encode($parameter));
         $result = Wallet::getRPC()->execute($method, $parameter);
 
@@ -99,6 +101,7 @@ class Wallet {
 
         Wallet::$error_code = Wallet::getRPC()->error_code;
         Wallet::$error_message = Wallet::getRPC()->error_message;
+        Wallet::$timer = microtime(true); - Wallet::$timer;
         return;
     }
 
