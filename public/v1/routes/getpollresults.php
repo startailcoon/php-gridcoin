@@ -1,6 +1,6 @@
 <?php
 
-use CoonDesign\phpGridcoin\Routes;
+use CoonDesign\phpGridcoin\Routes\GetPollResults;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
@@ -8,7 +8,7 @@ use Slim\Exception\HttpNotFoundException;
 $app->get('/getpollresults/{txid:[a-z0-9]+}', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
     $txid = $args['txid'];
 
-    $result = Routes\GetPollResults::execute($txid);
+    $result = GetPollResults::execute($txid);
 
     // Verify that the transaction exists
     if(is_null($result)) {

@@ -1,6 +1,6 @@
 <?php
 
-use CoonDesign\phpGridcoin\Routes;
+use CoonDesign\phpGridcoin\Routes\GetVoteDetails;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Exception\HttpNotFoundException;
@@ -8,7 +8,7 @@ use Slim\Exception\HttpNotFoundException;
 $app->get('/getvotedetails/{txid:[a-z0-9]+}', function (ServerRequestInterface $request, ResponseInterface $response, array $args) {
     $txid = $args['txid'];
 
-    $result = Routes\GetVoteDetails::execute($txid);
+    $result = GetVoteDetails::execute($txid);
 
     if(is_null($result)) {
         throw new HttpNotFoundException($request, 'A vote with that txid was not found');

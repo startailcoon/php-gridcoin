@@ -15,7 +15,6 @@ class Contracts {
     var string $action;
     /** @var ContractBody */
     var $body;
-
 }
 
 /** Placeholder to be replaced with a specific Contract Body Class */
@@ -24,7 +23,7 @@ class ContractBody {
     public static function determineClass($class, $json, $pjson) {
         if($pjson->version <= 2) {
                 
-            if($pjson->type == "")           return;
+            if($pjson->type == "")              return;
             if(is_string($json))                return 'string';
 
             switch(strtoupper($pjson->type)) {
