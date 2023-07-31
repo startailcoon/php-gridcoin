@@ -52,8 +52,29 @@ class Block {
         return strlen($this->claim->mining_id) == 32 ? $this->claim->mining_id : null;
     }
 
+    /**
+     * Returns the address of the staker.
+     * Requires the transaction model to be loaded
+     * 
+     * @return string|null
+     */
     public function getStakerAddress() {
+
+        foreach($this->tx as $mTx) {
+
+            // This needs to be a Transaction object and not the TXID reference
+            if(!is_object($mTx)) {
+                new \Exception("Transaction model not loaded");
+            }
+
+            foreach($mTx->vout as $vout) {
+                if(isset($vout->scriptPubKey->addresses)) {
+                    return $vout->scriptPubKey->addresses[0];
+                }
+            }
+        }
         
+        return null;
     }
 
 }

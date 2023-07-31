@@ -34,7 +34,7 @@ class Wallet {
     private static string $user;
     private static string $pass;
     public static int $timeout = 10;
-    public static int $timer = 0;
+    public static float $timer = 0;
     
     /**
      * Set the RPC to be a public node RPC
@@ -97,11 +97,13 @@ class Wallet {
         // printf("Executing method %s with args: %s\n", $method, json_encode($parameter));
         $result = Wallet::getRPC()->execute($method, $parameter);
 
+        $timer = microtime(true) - $timer;
+        Wallet::$timer += $timer;
+
         if($result) { return $result; }
 
         Wallet::$error_code = Wallet::getRPC()->error_code;
         Wallet::$error_message = Wallet::getRPC()->error_message;
-        Wallet::$timer = microtime(true); - $timer;
         return;
     }
 
