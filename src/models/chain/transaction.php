@@ -76,59 +76,44 @@ class Transaction {
 
 class Vin {
 
-    /** @var int */
-    var $coinbase;
+    var null|int $coinbase;
     
-    /** @var int */
-    var $sequence;
+    var int $sequence;
 
-    /** @var string */
-    var $txid;
+    var null|string $txid;
 
-    /** @var int */
-    var $vout;
+    var null|int $vout;
     
-    /** @var ScriptSig */
     var ScriptSig $scriptSig;
 }
 
 class ScriptSig {
 
-    /** @var string */
-    var $asm;
+    var string $asm;
     
-    /** @var string */
     var string $hex;
 }
 
 class Vout {
 
-    /** @var float */
-    var $value;
+    var float $value;
 
-    /** @var int */
-    var $n;
+    var int $n;
     
-    /** @var ScriptPubKey */
     var ScriptPubKey $scriptPubKey;
 }
 
 class ScriptPubKey {
 
-    /** @var string */
-    var $asm;
+    var string $asm;
 
-    /** @var string */
-    var $hex;
+    var string $hex;
 
-    /** @var int */
-    var $reqSigs;
+    var null|int $reqSigs;
 
-    /** @var string */
-    var $type;
+    var string $type;
 
-    /** @var array */
-    var $addresses;
+    var null|array $addresses;
 }
 
 
