@@ -2,11 +2,11 @@
 
 namespace CoonDesign\phpGridcoin;
 
-require __DIR__ . '/../../vendor/autoload.php';
-require __DIR__ . '/../../src/Wallet.php';
-require __DIR__ . '/HttpErrorHandler.php';
-require __DIR__ . '/ShutdownHandler.php';
-require __DIR__ . '/HttpRateLimitException.php';
+require realpath(__DIR__) . '/../../../vendor/autoload.php';
+require realpath(__DIR__) . '/../../../src/Wallet.php';
+require realpath(__DIR__) . '/HttpErrorHandler.php';
+require realpath(__DIR__) . '/ShutdownHandler.php';
+require realpath(__DIR__) . '/HttpRateLimitException.php';
 
 use CoonDesign\RateLimit\RateLimitMiddleware;
 use Slim\Exception\HttpNotFoundException;
@@ -32,12 +32,14 @@ $displayErrorDetails = true;
 // Set Wallet Node Connection Settings
 Wallet::setNode('localhost', '25717', 'gridcoinrpc', 'bkw75QgtWAAQpnU0MHR4qIQIfAqXR7OxdvHPHI6xI4VMQKXXEkpfPo2dT');
 
+$basePath = '/wallet/v1';
+
 // End of Setup
 // ------------------------------------
 
 // Create AppFactory
 $app = AppFactory::create();
-$app->setBasePath('/v1');
+$app->setBasePath($basePath);
 
 // Add Rate Limit Middleware
 // Limits per requester IP address, x requests per y seconds
@@ -91,9 +93,10 @@ $errorMiddleware->setDefaultErrorHandler($errorHandler);
 
 // Load all routes from the routes directory
 // ------------------------------------
-$route = explode("/", str_replace('/v1/', '', $_SERVER['REDIRECT_URL']));
 
-$route_file = __DIR__ . '/routes/' . $route[0] . '.php';
+$route = explode("/", str_replace($basePath, '', $_SERVER['REDIRECT_URL']));
+
+$route_file = realpath(__DIR__) . '/routes/' . $route[0] . '.php';
 if(!file_exists($route_file)) {
     throw new HttpNotFoundException($request, 'Route not found: ' . $route_file . "Route: " . json_encode($route) . " Server: " . json_encode($_SERVER));
 }
