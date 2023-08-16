@@ -2,11 +2,17 @@
 
 namespace CoonDesign\phpGridcoin;
 
-require realpath(__DIR__) . '/../../../vendor/autoload.php';
-require realpath(__DIR__) . '/../../../src/Wallet.php';
-require realpath(__DIR__) . '/HttpErrorHandler.php';
-require realpath(__DIR__) . '/ShutdownHandler.php';
-require realpath(__DIR__) . '/HttpRateLimitException.php';
+// Detect if the script is in a composer vendor directory
+if(stristr(__DIR__, 'vendor') !== false) {
+    require __DIR__ . '/../../../../../../vendor/autoload.php';
+} else {
+    require __DIR__ . '/../../../../vendor/autoload.php';
+}
+
+require __DIR__ . '/../../../src/Wallet.php';
+require __DIR__ . '/HttpErrorHandler.php';
+require __DIR__ . '/ShutdownHandler.php';
+require __DIR__ . '/HttpRateLimitException.php';
 
 use CoonDesign\RateLimit\RateLimitMiddleware;
 use Slim\Exception\HttpNotFoundException;

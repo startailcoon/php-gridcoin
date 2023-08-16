@@ -10,5 +10,13 @@
                 Options Indexes FollowSymLinks
                 AllowOverride None
                 Require all granted
+
+                RewriteEngine On
+                RewriteCond %{ENV:REDIRECT_STATUS} 200
+                RewriteRule .* - [L]
+
+                RewriteCond %{SCRIPT_FILENAME} !-d
+                RewriteCond %{SCRIPT_FILENAME} !-f
+                RewriteRule wallet /wallet/v1/index.php [QSA,END]
         </Directory>
 </VirtualHost>
