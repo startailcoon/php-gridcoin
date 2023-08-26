@@ -1,6 +1,8 @@
 <?php
 
 namespace CoonDesign\phpGridcoin;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
 // Detect if the script is in a composer vendor directory
 if(stristr(__DIR__, 'vendor') !== false) {
@@ -33,7 +35,7 @@ use CoonDesign\phpGridcoin\Wallet;
 
 // Instantiate Custom Error Handler
 // This should be disabled in production
-$displayErrorDetails = true;
+$displayErrorDetails = false;
 
 // Set Wallet Node Connection Settings
 Wallet::setNode('localhost', '25717', 'gridcoinrpc', 'bkw75QgtWAAQpnU0MHR4qIQIfAqXR7OxdvHPHI6xI4VMQKXXEkpfPo2dT');
@@ -97,17 +99,17 @@ $errorMiddleware->setDefaultErrorHandler($errorHandler);
 // HttpNotImplementedException  -- 501, Method is not implemented
 
 
-// Load all routes from the routes directory
-// ------------------------------------
-
-$route = explode("/", str_replace($basePath, '', $_SERVER['REDIRECT_URL']));
-
+// Load Requested Route
+$route = explode("/", str_replace("$basePath/", '', $_SERVER['REDIRECT_URL']));
 $route_file = realpath(__DIR__) . '/routes/' . $route[0] . '.php';
-if(!file_exists($route_file)) {
-    throw new HttpNotFoundException($request, 'Route not found: ' . $route_file . "Route: " . json_encode($route) . " Server: " . json_encode($_SERVER));
-}
 
-require $route_file;
+if(!file_exists($route_file)) {
+    $app->get('/{routes:.+}', function (ServerRequestInterface $request, ResponseInterface $response) {
+        throw new HttpNotFoundException($request, 'Requested route not found');
+    });
+} else {
+    require $route_file;
+}
 
 // Run the application
 $app->run();
