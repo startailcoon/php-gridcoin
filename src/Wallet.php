@@ -5,6 +5,8 @@ namespace CoonDesign\phpGridcoin;
 use Exception;
 use Curl;
 
+require_once __DIR__ . "/formatCoin.php";
+
 // Load all models
 foreach(glob(__DIR__ . "/models/*") as $dir) {
     foreach(glob($dir . "/*.php") as $file) {

@@ -4,6 +4,8 @@ namespace CoonDesign\phpGridcoin\Models\Chain;
 
 require_once __DIR__ . "/contract.php";
 
+use CoonDesign\phpGridcoin\Coin;
+
 class Transaction {
 
     var string $txid;
@@ -51,6 +53,11 @@ class Transaction {
         return TransactionType::TRANSFER;
     }
 
+    /**
+     * Get the addresses of outputs for the transaction
+     * 
+     * @return array<string>
+     */
     function getOutputAddresses() {
         $addresses = array();
 
@@ -63,14 +70,61 @@ class Transaction {
         return $addresses;
     }
 
-    function getOutputValue() {
-        $value = 0;
+    /**
+     * Get the value of outputs for the transaction
+     * 
+     * @return Coin
+     */
+    function getOutputValue():Coin {
+        $coin = new Coin();
 
         foreach($this->vout as $vout) {
-            $value += $vout->value;
+            $coin->add($vout->value);
         }
 
-        return $value;
+        return $coin;
+    }
+
+    /**
+     * Get the value of inputs for the transaction
+     * This function requires the inputs to be passed as an array of Transaction objects
+     * 
+     * @var array<Transaction> $inputs
+     * @return Coin
+     */
+    function getInputValue(array $inputs):Coin {
+        $coin = new Coin();
+
+        foreach($this->vin as $vin) {
+            if(!isset($inputs[$vin->txid])) {
+                throw new \Exception("Input transaction '{$vin->txid}' not found!");
+            }
+
+            $coin->add($inputs[$vin->txid]->vout[$vin->vout]->value);
+        }
+
+        return $coin;
+    }
+
+    /**
+     * Get the addresses of inputs for the transaction
+     * This function requires the inputs to be passed as an array of Transaction objects
+     * 
+     * @var array<Transaction> $inputs
+     * @return array<string>
+     */
+    function getInputAddresses(array $inputs):array {
+        $addresses = array();
+
+        foreach($this->vin as $vin) {
+            if(!isset($inputs[$vin->txid])) {
+                throw new \Exception("Input transaction '{$vin->txid}' not found!");
+            }
+
+            $addresses[$inputs[$vin->txid]->vout[$vin->vout]->scriptPubKey->addresses[0]] = $inputs[$vin->txid]->vout[$vin->vout]->scriptPubKey->addresses[0];
+        }
+
+        return $addresses;
     }
 }
 

@@ -1,11 +1,9 @@
 <?php
 
-require_once __DIR__ . "/../src/models/contract.php";
-
+use CoonDesign\phpGridcoin\Wallet;
 use CoonDesign\phpGridcoin\Routes\GetBestBlockHash;
 use CoonDesign\phpGridcoin\Routes\GetBlockByNumber;
-use CoonDesign\phpGridcoin\Wallet;
-use CoonDesign\phpGridcoin\Models\ContractBeacon;
+use CoonDesign\phpGridcoin\Routes\GetTransation;
 
 class SimpleTest extends \PHPUnit\Framework\TestCase {
 
@@ -19,78 +17,47 @@ class SimpleTest extends \PHPUnit\Framework\TestCase {
     }
 
     function testGetBlockByNumber() {
-        $result = GetBlockByNumber::execute(1);
+        $result = GetBlockByNumber::execute(1, true);
         $this->assertIsObject($result);
         $this->assertObjectHasProperty("hash", $result);
     }
 
-    ## TODO: Fix the rest of the tests
-    
-    public function testGetBlockCount() {
-        $this->assertIsInt(Wallet::getblockcount());
+    function testGetOutputTransaction() {
+        $result = GetTransation::execute("cf115d5fcdf1c2f91bbc238e3e5c9616fab787932bb8d9400bcc9b27d020e631");
+        $value = $result->getOutputValue();
+
+        $this->assertIsFloat($value->getFloat());
+        $this->assertIsInt($value->getInt());
+
+        $this->assertEquals(29502869065, $value->getInt());
+        $this->assertEquals(295.02869065, $value->getFloat());
+
+        $this->assertIsArray($result->getOutputAddresses());
     }
 
-    public function testGetBlockHash() {
-        $this->assertIsObject(Wallet::getblockbynumber(1));
-        $this->assertObjectHasProperty("hash", Wallet::getblockbynumber(1));
-    }
+    function testGetInputTransactionValue() {
+        $result = GetTransation::execute("cf115d5fcdf1c2f91bbc238e3e5c9616fab787932bb8d9400bcc9b27d020e631");
 
-    public function testGetBlocksBatchWithTxData() {
-        foreach(Wallet::getblocksbatch(1, 1, true) as $block) {
-            $this->assertIsObject($block);
-            $this->assertObjectHasProperty("hash", $block);
-            $this->assertObjectHasProperty("tx", $block);
-            $this->assertIsObject($block->tx[0]);
-            $this->assertObjectHasProperty("txid", $block->tx[0]);
-        }
-    }
+        $txArray = [];
 
-    public function testGetBlocksBatchWithoutTxData() {
-        foreach(Wallet::getblocksbatch(1, 1, false) as $block) {
-            $this->assertIsObject($block);
-            $this->assertObjectHasProperty("hash", $block);
-            $this->assertObjectHasProperty("tx", $block);
-            $this->assertIsString($block->tx[0]);
-        }
-    }
-
-    public function testGetTransaction() {
-        $data = Wallet::gettransaction("945051eb9c4f6c56a7620d1112dab0122e41f2b17b58338e45ce58164c52e068");
-        $this->assertIsObject($data);
-        $this->assertObjectHasProperty("txid", $data);
-    }
-
-    public function testContractBeacon() {
-        $data = Wallet::gettransaction("be7446e0fd091c5d45fc4d4e67dc7fc71526a7d5309add0c768cfdd5f1076fe0");
-        
-        /** @var ContractBeacon */
-        $body = $data->contracts[0]->body;
-
-        $this->assertIsObject($data);  
-        $this->assertObjectHasProperty("cpid", $body);
-    }
-
-    public function testGetMempool() {
-
-        $mempool = Wallet::getrawmempool();
-
-        // This output can be an empty array, so we can't test for an object 
-        // But we can test this to make sure the command works
-        $this->assertIsArray($mempool);
-
-        // If the mempool is not empty, we can test for the txid property
-        if(!empty($mempool)) {
-            foreach($mempool as $tx) {
-                $this->assertIsObject($tx);
-                $this->assertObjectHasProperty("txid", $tx);
+        foreach($result->vin as $vin) {
+            if(isset($txArray[$vin->txid])) {
+                continue;
             }
-        }
-    }
 
-    // public function testBlock() {
-    //     $this->connect();
-    //     $block = Wallet::getblockbynumber(1);
-    // }
+            $txArray[$vin->txid] = GetTransation::execute($vin->txid);
+        }
+
+        $value = $result->getInputValue($txArray);
+        $this->assertIsFloat($value->getFloat());
+        $this->assertIsInt($value->getInt());
+
+        $this->assertEquals(29502969065, $value->getInt());
+        $this->assertEquals(295.02969065, $value->getFloat());
+
+        $addresses = $result->getInputAddresses($txArray);
+        $this->assertIsArray($addresses);
+    }
 
 }
 
