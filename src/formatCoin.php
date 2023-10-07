@@ -13,10 +13,10 @@ class Coin {
     private int $decimals = 8;  // Gridcoin default decimals
     private int $value = 0;
 
-    public function setDecimals($decimals) {
-        $this->decimals = $decimals;
+    public function __construct(int|float $v = 0) {
+        $this->add($v);
     }
-
+    
     public function add(int|float $v) {
 
         if(is_float($v)) {
