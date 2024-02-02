@@ -13,7 +13,7 @@ class Block {
     var int $version;
     var string $merkleroot;
     var float $mint;
-    var int $MoneySupply;
+    var float $MoneySupply;
     var int $time;
     var int $nonce;
     var string $bits;
