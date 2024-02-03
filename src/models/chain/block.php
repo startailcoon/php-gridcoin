@@ -4,6 +4,7 @@ namespace CoonDesign\phpGridcoin\Models\Chain;
 
 require_once __DIR__ . "/contract_mrc.php";
 require_once __DIR__ . "/transaction.php";
+require_once __DIR__ . "/../ageSinceTimestamp.php";
 
 class Block {
 
@@ -77,6 +78,11 @@ class Block {
         return null;
     }
 
+    public function getBlockAge() {
+        $timeline = time() - $this->time;
+
+        return ageSinceTimestamp($timeline);
+    }
 }
 
 class Superblock {
