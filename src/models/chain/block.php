@@ -81,7 +81,7 @@ class Block {
     public function getBlockAge() {
         $timeline = time() - $this->time;
 
-        return ageSinceTimestamp($timeline);
+        return \CoonDesign\phpGridcoin\ageSinceTimestamp($timeline);
     }
 }
 
