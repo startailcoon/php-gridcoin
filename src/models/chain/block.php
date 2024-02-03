@@ -4,7 +4,7 @@ namespace CoonDesign\phpGridcoin\Models\Chain;
 
 require_once __DIR__ . "/contract_mrc.php";
 require_once __DIR__ . "/transaction.php";
-require_once __DIR__ . "/../ageSinceTimestamp.php";
+require_once __DIR__ . "/../../ageSinecTimestamp.php";
 
 class Block {
 
