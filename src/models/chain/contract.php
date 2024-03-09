@@ -21,7 +21,7 @@ class Contracts {
 class ContractBody { 
 
     public static function determineClass($class, $json, $pjson) {
-        if($pjson->version <= 2) {
+        if($pjson->version <= 3) {
                 
             if($pjson->type == "")              return;
             if(is_string($json))                return 'string';
