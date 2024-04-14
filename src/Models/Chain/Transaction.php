@@ -2,7 +2,7 @@
 
 namespace CoonDesign\phpGridcoin\Models\Chain;
 
-require_once __DIR__ . "/contract.php";
+require_once __DIR__ . "/Contract.php";
 
 use CoonDesign\phpGridcoin\Coin;
 

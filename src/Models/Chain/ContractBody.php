@@ -2,7 +2,6 @@
 
 namespace CoonDesign\phpGridcoin\Models\Chain;
 
-
 /** Placeholder to be replaced with a specific Contract Body Class */
 class ContractBody { 
     public static function determineClass($class, $json, $pjson) {
