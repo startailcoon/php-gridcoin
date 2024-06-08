@@ -61,13 +61,13 @@ class Transaction {
 
         if(isset($this->vout[0]->scriptPubKey->asm)) {
 
-            if($this->vout[0]->scriptPubKey->asm == "OP_RETURN") {
+            $asm_objects = explode(" ", $this->vout[0]->scriptPubKey->asm);
+
+            if(in_array("OP_RETURN", $asm_objects)) {
                 return TransactionType::BURN;
             }
 
-            if(stristr($this->vout[0]->scriptPubKey->asm, "OP_HASH160") 
-                && stristr($this->vout[0]->scriptPubKey->asm, "OP_EQUAL")) 
-            {
+            if(in_array("OP_HASH160", $asm_objects) && in_array("OP_EQUAL", $asm_objects)) {
                 return TransactionType::PAY2SCRIPT;
             }
 
