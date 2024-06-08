@@ -43,6 +43,7 @@ class Transaction {
         }
 
         if(isset($this->contracts[0]->body->mining_id)) {
+
             if($this->contracts[0]->body->mining_id == "INVESTOR") {
                 return TransactionType::MINT_POS;
             }
@@ -56,6 +57,20 @@ class Transaction {
 
         if(isset($this->contracts[0]->type) && !empty($this->contracts[0]->type)) {
             return TransactionType::checkConstat(TransactionType::CONTRACT . "_" . strtoupper($this->contracts[0]->type));
+        }
+
+        if(isset($this->vout[0]->scriptPubKey->asm)) {
+
+            if($this->vout[0]->scriptPubKey->asm == "OP_RETURN") {
+                return TransactionType::BURN;
+            }
+
+            if(stristr($this->vout[0]->scriptPubKey->asm, "OP_HASH160") 
+                && stristr($this->vout[0]->scriptPubKey->asm, "OP_EQUAL")) 
+            {
+                return TransactionType::PAY2SCRIPT;
+            }
+
         }
 
         return TransactionType::TRANSFER;
