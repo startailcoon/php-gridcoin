@@ -42,6 +42,14 @@ class Transaction {
             return TransactionType::MINT_POW;
         }
 
+        if(isset($this->contracts[0]->body->mining_id)) {
+            if($this->contracts[0]->body->mining_id == "INVESTOR") {
+                return TransactionType::MINT_POS;
+            }
+
+            return TransactionType::MINT_POR;
+        }
+
         if(isset($this->vout[0]->scriptPubKey->type) && $this->vout[0]->scriptPubKey->type == "nonstandard") {
             return TransactionType::MINT_GEN;
         }
