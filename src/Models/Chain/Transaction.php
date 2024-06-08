@@ -149,7 +149,7 @@ class Transaction {
                 throw new \Exception("Input transaction '{$vin->txid}' not found!");
             }
 
-            $addresses[$inputs[$array_key]->vout[$vin->vout]->scriptPubKey->addresses[0]] = $inputs[$vin->txid]->vout[$vin->vout]->scriptPubKey->addresses[0];
+            $addresses[$inputs[$array_key]->vout[$vin->vout]->scriptPubKey->addresses[0]] = $inputs[$array_key]->vout[$vin->vout]->scriptPubKey->addresses[0];
         }
 
         return $addresses;
