@@ -104,11 +104,13 @@ class Transaction {
         $coin = new Coin();
 
         foreach($this->vin as $vin) {
-            if(!isset($inputs[$vin->txid])) {
+            $array_key = array_search($vin->txid, array_column($inputs, 'txid'));
+
+            if($array_key === false) {
                 throw new \Exception("Input transaction '{$vin->txid}' not found!");
             }
 
-            $coin->add($inputs[$vin->txid]->vout[$vin->vout]->value);
+            $coin->add($inputs[$array_key]->vout[$vin->vout]->value);
         }
 
         return $coin;
@@ -125,11 +127,14 @@ class Transaction {
         $addresses = array();
 
         foreach($this->vin as $vin) {
-            if(!isset($inputs[$vin->txid])) {
+
+            $array_key = array_search($vin->txid, array_column($inputs, 'txid'));
+
+            if($array_key === false) {
                 throw new \Exception("Input transaction '{$vin->txid}' not found!");
             }
 
-            $addresses[$inputs[$vin->txid]->vout[$vin->vout]->scriptPubKey->addresses[0]] = $inputs[$vin->txid]->vout[$vin->vout]->scriptPubKey->addresses[0];
+            $addresses[$inputs[$array_key]->vout[$vin->vout]->scriptPubKey->addresses[0]] = $inputs[$vin->txid]->vout[$vin->vout]->scriptPubKey->addresses[0];
         }
 
         return $addresses;
