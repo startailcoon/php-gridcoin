@@ -19,6 +19,11 @@ class Coin {
     
     public function add(int|float $v) {
 
+        // Convert scientific notation to string
+        if(stristr($v, "E-")) {
+            $v = sprintf('%f', $v);
+        }
+        
         if(is_float($v)) {
             $precision = strlen(substr(strrchr($v, "."), 1));
             $v = intval(str_replace(".", "", $v));
