@@ -24,7 +24,7 @@ class Coin {
             $v = sprintf('%f', $v);
         }
         
-        if(is_float($v)) {
+        if(!is_int($v)) {
             $precision = strlen(substr(strrchr($v, "."), 1));
             $v = intval(str_replace(".", "", $v));
 
