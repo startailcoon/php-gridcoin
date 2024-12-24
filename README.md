@@ -88,6 +88,6 @@ This can be used by adding the following to the `composer.json` settings.
         }
 ],
 "require": {
-    "netresearch/jsonmapper": "dev-classMapFix"
+    "netresearch/jsonmapper": "dev-master"
 }
 ```
