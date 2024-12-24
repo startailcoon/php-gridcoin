@@ -23,7 +23,7 @@
         }
     ],
     "require": {
-        "netresearch/jsonmapper": "dev-classMapFix",
+        "netresearch/jsonmapper": "dev-master",
         "curl/curl": "^2.5",
         "php": ">=8",
         "ext-json": "*",
